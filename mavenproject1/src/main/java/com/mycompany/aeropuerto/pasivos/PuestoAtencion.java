@@ -8,23 +8,39 @@ import com.mycompany.aeropuerto.Pasaje;
 
 public class PuestoAtencion {
 
+    private final String aerolinea;
     private final HashMap<Integer, Vuelo> mapaVuelos;
     private final ArrayBlockingQueue<Semaphore> colaEspera;
     private final Semaphore semaforoRecepcionista;
+    private final Semaphore semaforoGuardia;
     private Semaphore semaforoClienteActual;
     private Pasaje pasajeActual;
     private Terminal terminalPasajeActual;
     private int puertoEmbarqueActual;
     
-    public PuestoAtencion(int capacidad){
+    public PuestoAtencion(String aerolinea, int capacidad){
+        this.aerolinea = aerolinea;
         mapaVuelos = new HashMap<>();
         colaEspera = new ArrayBlockingQueue(capacidad);
         semaforoRecepcionista = new Semaphore(0);
+        semaforoGuardia = new Semaphore(0);
+    }
+    
+    public String getAerolinea(){
+        return aerolinea;
     }
     
     //  Metodo para agregar los vuelos de la aerolinea
     public synchronized void agregarVuelo(Vuelo vuelo){
         mapaVuelos.put(vuelo.getNumVuelo(), vuelo);
+    }
+    
+    public synchronized boolean eliminarVuelo(int numeroVuelo){
+        return (mapaVuelos.remove(numeroVuelo) != null);
+    }
+    
+    public synchronized void vaciarVuelos(){
+        mapaVuelos.clear();
     }
     
     //  Metodos para el hilo Pasajero
@@ -59,6 +75,7 @@ public class PuestoAtencion {
     
     public synchronized void esperarCliente() throws InterruptedException{
         semaforoClienteActual = colaEspera.take();
+        semaforoGuardia.release();
     }
     
     public void avisarCliente() throws InterruptedException{
@@ -78,5 +95,11 @@ public class PuestoAtencion {
     
     public void esperarclienteInformacion() throws InterruptedException{
         semaforoRecepcionista.acquire();
+    }
+    
+    //  Metodo para el guardia
+
+    public void esperarDesocupe() throws InterruptedException{
+        semaforoGuardia.acquire();
     }
 }

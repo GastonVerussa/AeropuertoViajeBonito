@@ -48,6 +48,16 @@ public class Tren {
     
     //  Metodos para el Maquinista
     
+    public void esperarCapacidad() throws InterruptedException{
+        //  Espera que se vacie el contador (se llene el tren)
+        contador.await();
+    }
+    
+    //  Se fija si alguien pidio bajarse en esa terminal
+    public boolean checkearParada(String terminal){
+        return conteoParadas.get(terminal).availablePermits() != 0;
+    }
+    
     public void arribarParada(String terminal) throws InterruptedException{
         //  Avisa que se llego a la parada
         conteoParadas.get(terminal).notifyAll();
@@ -62,10 +72,5 @@ public class Tren {
         contador = new CountDownLatch(capacidad);
         //  Les avisa que llego a la estacion a los que esten esperando
         this.notifyAll();
-    }
-    
-    public void esperarCapacidad() throws InterruptedException{
-        //  Espera que se vacie el contador (se llene el tren)
-        contador.await();
     }
 }

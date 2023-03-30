@@ -4,9 +4,9 @@ public class Pasaje {
     
     private final String aerolinea;
     private final int numVuelo;
-    private final int horario;
+    private final Horario horario;
     
-    public Pasaje(String aerolinea, int numVuelo, int horario){
+    public Pasaje(String aerolinea, int numVuelo, Horario horario){
         this.aerolinea = aerolinea;
         this.numVuelo = numVuelo;
         this.horario = horario;
@@ -20,7 +20,7 @@ public class Pasaje {
         return numVuelo;
     }
 
-    public int getHorario() {
+    public Horario getHorario() {
         return horario;
     }
 }

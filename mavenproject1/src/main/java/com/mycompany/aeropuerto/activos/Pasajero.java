@@ -1,11 +1,10 @@
 package com.mycompany.aeropuerto.activos;
 
+import com.mycompany.aeropuerto.ManejadorTiempo;
 import com.mycompany.aeropuerto.Pasaje;
 import com.mycompany.aeropuerto.pasivos.*;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Pasajero extends Thread{
     
@@ -18,6 +17,7 @@ public class Pasajero extends Thread{
     private static Tren tren;
     private static HallCentral hall;
     private static Random random;
+    private static ManejadorTiempo tiempo;
     private final Semaphore semaforoPersonal;
     
     public Pasajero(Pasaje pasaje, String nombre){
@@ -28,10 +28,11 @@ public class Pasajero extends Thread{
         semaforoPersonal = new Semaphore(0);
     }
     
-    public static void setDatos(PuestoInformes puesto, Tren tren, HallCentral hall){
+    public static void setDatos(PuestoInformes puesto, Tren tren, HallCentral hall, ManejadorTiempo tiempo){
         Pasajero.puestoInformes = puesto;
         Pasajero.tren = tren;
         Pasajero.hall = hall;
+        Pasajero.tiempo = tiempo;
     }
     
     @Override
@@ -42,6 +43,9 @@ public class Pasajero extends Thread{
         try {
             while(!puestoAtencion.entrarCola(semaforoPersonal)){
                 //  Va al hall central a esperar
+                imprimir("La cola esta llena, a esperar al hall");
+                hall.esperarHall(puestoAtencion);
+                imprimir("Oh gracias guardia, a ver si puedo entrar.");
             }
             imprimir("Logre entrar a la cola, ahora a esperar mi turno.");
             puestoAtencion.esperarAtencion(semaforoPersonal);
@@ -109,17 +113,15 @@ public class Pasajero extends Thread{
     }
     
     public boolean comprobarTiempo(){
-        return true;
+        //  Se fija cuanto tiempo le queda para su vuelo
+        long segundosRestantes = tiempo.milisRestantesParaHorario(pasaje.getHorario());
+        //  Si tiene al menos una hora de tiempo, le parece suficiente
+        return segundosRestantes >= tiempo.duracionHora();
     }
     
     public boolean decidirRandom(){
         //  Devuelve un boolean al azar. 
         return Math.random() < 0.5;
-    }
-    
-    public void darInformacion(Terminal terminal, int puertoEmbarque){
-        this.terminal = terminal;
-        this.puertoEmbarque = puertoEmbarque;
     }
     
     private void imprimir(String cadena){

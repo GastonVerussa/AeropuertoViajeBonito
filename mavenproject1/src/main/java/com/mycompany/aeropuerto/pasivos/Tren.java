@@ -1,8 +1,10 @@
 package com.mycompany.aeropuerto.pasivos;
 
+import com.mycompany.aeropuerto.ManejadorTiempo;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 
 public class Tren {
@@ -12,7 +14,8 @@ public class Tren {
     private CountDownLatch contador;
     //  Un mapa que contiene los semaforos usados para cada parada
     private final HashMap<String, Semaphore> conteoParadas;
-    
+    //  Boolean para saber si el tren esta en base
+    private boolean estaEnBase;
     
     //  Constructor de parada
     public Tren(int capacidad, String[] terminales){
@@ -22,13 +25,14 @@ public class Tren {
         for (String terminal : terminales) {
             conteoParadas.put(terminal, new Semaphore(0));
         }
+        this.estaEnBase = true;
     }
     
     //  Metodos para el Pasajero
     
     public synchronized void subirse(String terminal) throws InterruptedException{
         //  Checkea que haya espacio en el tren
-        while(contador.getCount() == 0){
+        while(contador.getCount() == 0 || !estaEnBase){
             //barrera.isBroken()
             //  Si no hay, espera a que vuelva el tren y checkea de nuevo
             this.wait();
@@ -48,9 +52,18 @@ public class Tren {
     
     //  Metodos para el Maquinista
     
-    public void esperarCapacidad() throws InterruptedException{
-        //  Espera que se vacie el contador (se llene el tren)
-        contador.await();
+    public synchronized boolean esperarCapacidad() throws InterruptedException{
+        //  Espera que se vacie el contador (se llene el tren) o pase el tiempo designado (media hora)
+        boolean trenLleno = contador.await(ManejadorTiempo.duracionHora() / 2, TimeUnit.MILLISECONDS);
+        //  Avisa que partio el tren
+        this.estaEnBase = false;
+        //  Devuelve el boolean para decirle al maquinista si el tren esta lleno o pasó el tiempo
+        return trenLleno;
+    }
+    
+    //  Variable para saber si esta vacio
+    public boolean estaVacio(){
+        return contador.getCount() == capacidad;
     }
     
     //  Se fija si alguien pidio bajarse en esa terminal
@@ -70,6 +83,7 @@ public class Tren {
     public synchronized void volverEstacionBase() throws InterruptedException{
         //  Recrea el contador para permitir que se suban de nuvo
         contador = new CountDownLatch(capacidad);
+        this.estaEnBase = true;
         //  Les avisa que llego a la estacion a los que esten esperando
         this.notifyAll();
     }

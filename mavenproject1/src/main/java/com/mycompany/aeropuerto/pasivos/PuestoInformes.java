@@ -18,9 +18,9 @@ public class PuestoInformes {
         mapaTerminales.put(nombreAerolinea, new PuestoAtencion(nombreAerolinea, capacidadPuesto));
     }
     
-    public void agregarVuelo(Vuelo vuelo){
+    public boolean agregarVuelo(Vuelo vuelo){
         PuestoAtencion puesto =  mapaTerminales.get(vuelo.getAerolinea());
-        puesto.agregarVuelo(vuelo);
+        return puesto.agregarVuelo(vuelo);
     }
     
     public boolean eliminarVuelo(Vuelo vuelo){

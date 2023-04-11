@@ -1,14 +1,14 @@
 package com.mycompany.aeropuerto.activos;
 
+import com.mycompany.aeropuerto.GeneradorPasajes;
 import com.mycompany.aeropuerto.ManejadorTiempo;
 import com.mycompany.aeropuerto.Pasaje;
 import com.mycompany.aeropuerto.pasivos.*;
 import java.util.Random;
-import java.util.concurrent.Semaphore;
 
 public class Pasajero extends Thread{
     
-    private final Pasaje pasaje;
+    private Pasaje pasaje;
     private final String nombre;
     private Terminal terminal;
     private int puertoEmbarque;
@@ -17,38 +17,40 @@ public class Pasajero extends Thread{
     private static Tren tren;
     private static HallCentral hall;
     private static Random random;
-    private static ManejadorTiempo tiempo;
-    private final Semaphore semaforoPersonal;
+    private static GeneradorPasajes generadorPasajes;
     
-    public Pasajero(Pasaje pasaje, String nombre){
+    public Pasajero(String nombre){
         super(nombre);
-        this.pasaje = pasaje;
         this.nombre = nombre;
-        Pasajero.random = new Random();
-        semaforoPersonal = new Semaphore(0);
-    }
+    }   
     
-    public static void setDatos(PuestoInformes puesto, Tren tren, HallCentral hall, ManejadorTiempo tiempo){
+    public static void setDatos(PuestoInformes puesto, Tren tren, HallCentral hall, GeneradorPasajes generadorPasajes){
         Pasajero.puestoInformes = puesto;
         Pasajero.tren = tren;
         Pasajero.hall = hall;
-        Pasajero.tiempo = tiempo;
+        Pasajero.random = new Random(System.currentTimeMillis());
+        Pasajero.generadorPasajes = generadorPasajes;
     }
     
     @Override
     public void run(){
         imprimir("Llegue al aeropuerto");
+        try {
+            pasaje = generadorPasajes.crearPasajeRandom();
+        } catch (Exception ex) {
+            imprimir("No pude conseguir pasaje");
+        }
+        imprimir("Traje mi pasaje");
         puestoAtencion = puestoInformes.recuperarPuesto(pasaje.getAerolinea());
         imprimir("Muchas gracias, ire al puesto de atencion de " + pasaje.getAerolinea());
         try {
-            while(!puestoAtencion.entrarCola(semaforoPersonal)){
+            while(!puestoAtencion.entrarCola(this)){
                 //  Va al hall central a esperar
                 imprimir("La cola esta llena, a esperar al hall");
                 hall.esperarHall(puestoAtencion);
                 imprimir("Oh gracias guardia, a ver si puedo entrar.");
             }
-            imprimir("Logre entrar a la cola, ahora a esperar mi turno.");
-            puestoAtencion.esperarAtencion(semaforoPersonal);
+                    //imprimir("Logre entrar a la cola, ahora a esperar mi turno.");
             //  Realiza comunicacion con recepcionista
             imprimir("Buen dia, si, este es mi pasaje.");
             puestoAtencion.mostrarPasaje(pasaje);
@@ -86,8 +88,17 @@ public class Pasajero extends Thread{
                     }
                     //  Decide si quiere comprar algo
                     if(this.decidirRandom()){
-                        terminal.comprarFreeShop();
-                        imprimir("Compre algo");
+                        try{
+                            imprimir("Bueno, voy a comprar");
+                            int numCaja = terminal.irCajaFreeShop();
+                            imprimir("Buen dia deseo comprar algo");
+                            terminal.comprarFreeShop(numCaja);
+                            imprimir("Este producto quiero comprar");
+                            terminal.pagarFreeShop(numCaja);
+                            imprimir("Muy bien, tome el pago, adios!");
+                        } catch(InterruptedException e){
+                            imprimir("Error comprando");
+                        }
                     } else {
                         imprimir("Mejor no compro nada");
                     }
@@ -104,19 +115,32 @@ public class Pasajero extends Thread{
         }
         imprimir("Ahora a esperar el avion");
         try {
+            do{
             //  Espera que llegue su avion
             terminal.esperarAvion(puertoEmbarque);
+            if(pasaje.getNumVuelo() == terminal.recuperarNumVueloPuerto(puertoEmbarque)){
+                //  Si es su vuelo
+                imprimir("Llegó mi avion, Adios!");
+                break;
+            } else {
+                if(ManejadorTiempo.getMilisPasadosActual() < (-ManejadorTiempo.duracionHora())){
+                    //  Si no es su vuelo pero pasó más de 1 hora de su vuelo
+                    imprimir("Ya esperé mucho, pasó más de una hora de mi vuelo, me voy");
+                    break;
+                }
+            }
+            //  Si no era su vuelo, pero todavia no pasó el horario del suyo, sigue esperando
+            }while(true);
         } catch (InterruptedException ex) {
             imprimir("Tuve un problema esperando el avion");
         }
-        imprimir("Llegó mi avion, Adios!");
     }
     
     public boolean comprobarTiempo(){
         //  Se fija cuanto tiempo le queda para su vuelo
-        long segundosRestantes = tiempo.milisRestantesParaHorario(pasaje.getHorario());
+        long segundosRestantes = ManejadorTiempo.milisRestantesParaHorario(pasaje.getHorario());
         //  Si tiene al menos una hora de tiempo, le parece suficiente
-        return segundosRestantes >= tiempo.duracionHora();
+        return segundosRestantes >= ManejadorTiempo.duracionHora();
     }
     
     public boolean decidirRandom(){

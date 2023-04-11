@@ -1,18 +1,37 @@
 package com.mycompany.aeropuerto.pasivos;
 
+import com.mycompany.aeropuerto.ManejadorTiempo;
 import com.mycompany.aeropuerto.activos.Cajero;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class FreeShop {
 
-    private final Cajero cajero1;
-    private final Cajero cajero2;
+    private final Cajero[] cajeros;
     private final Semaphore capacidad;
+    private final ReentrantLock[] mutexCajas;
+    private final Semaphore[] semaforosCajeros;
+    private final Semaphore[] semaforosClientes;
     
-    public FreeShop(int capacidad){
-        cajero1 = new Cajero("1", this);
-        cajero2 = new Cajero("2", this);
+    public FreeShop(int capacidad, int cantidadCajeros){
         this.capacidad = new Semaphore(capacidad);
+        cajeros = new Cajero[cantidadCajeros];
+        for(int i = 0; i < cajeros.length; i++){
+            cajeros[i] = new Cajero(String.valueOf(i), this, i);
+        }
+        this.semaforosCajeros = new Semaphore[cantidadCajeros];
+        for(int i = 0; i < semaforosCajeros.length; i++){
+            semaforosCajeros[i] = new Semaphore(0);
+        }
+        this.semaforosClientes = new Semaphore[cantidadCajeros];
+        for(int i = 0; i < semaforosClientes.length; i++){
+            semaforosClientes[i] = new Semaphore(1);
+        }
+        this.mutexCajas = new ReentrantLock[cantidadCajeros];
+        for(int i = 0; i < mutexCajas.length; i++){
+            mutexCajas[i] = new ReentrantLock();
+        }
     }
     
     //  Metodos para pasajero
@@ -23,13 +42,32 @@ public class FreeShop {
     }
     
     //  Va a una de las cajas
-    public void irCaja(){
-        
+    public synchronized int irCaja() {
+        //  Espera que haya al menos una caja libre
+        int cajaLibre = -1;
+        while(cajaLibre == -1){
+            for(int i = 0; i <= mutexCajas.length; i++){
+                if(mutexCajas[i].tryLock()){
+                    cajaLibre = i;
+                    break;
+                }
+            }
+        }
+        semaforosCajeros[cajaLibre].release();
+        return cajaLibre;
     }
     
     //  Compra
-    public void comprar(){
-        
+    public void comprar(int cajaLibre) throws InterruptedException{
+        semaforosClientes[cajaLibre].acquire();
+        semaforosCajeros[cajaLibre].release();
+    }
+    
+    //  Paga y se retira
+    public void pagar(int cajaLibre) throws InterruptedException{
+        semaforosClientes[cajaLibre].acquire();
+        semaforosCajeros[cajaLibre].release();
+        mutexCajas[cajaLibre].unlock();
     }
     
     //  Sale del free shop
@@ -39,15 +77,17 @@ public class FreeShop {
     
     //  Metodos para Cajero
     
-    public void atenderCliente(){
-        
+    public boolean atenderCliente(int numCajero) throws InterruptedException {
+        return semaforosCajeros[numCajero].tryAcquire(ManejadorTiempo.duracionMinuto() * 10, TimeUnit.MILLISECONDS);
     }
     
-    public void esperarRespuestaCliente(){
-        
+    public void esperarRespuestaCliente(int numCajero) throws InterruptedException {
+        semaforosClientes[numCajero].release();
+        semaforosCajeros[numCajero].acquire();
     }
     
-    public void cobrarCliente(){
-        
+    public void cobrarCliente(int numCajero) throws InterruptedException {
+        semaforosClientes[numCajero].release();
+        semaforosCajeros[numCajero].acquire();
     }
 }

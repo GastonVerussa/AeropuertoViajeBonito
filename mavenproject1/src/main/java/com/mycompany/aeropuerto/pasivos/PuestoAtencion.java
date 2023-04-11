@@ -1,19 +1,23 @@
 package com.mycompany.aeropuerto.pasivos;
 
+import com.mycompany.aeropuerto.ManejadorTiempo;
 import com.mycompany.aeropuerto.Vuelo;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 import com.mycompany.aeropuerto.Pasaje;
+import com.mycompany.aeropuerto.activos.Pasajero;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 public class PuestoAtencion {
 
     private final String aerolinea;
     private final HashMap<Integer, Vuelo> mapaVuelos;
-    private final ArrayBlockingQueue<Semaphore> colaEspera;
+    private final ArrayBlockingQueue<Pasajero> colaEspera;
     private final Semaphore semaforoRecepcionista;
     private final Semaphore semaforoGuardia;
-    private Semaphore semaforoClienteActual;
+    private Pasajero clienteActual;
     private Pasaje pasajeActual;
     private Terminal terminalPasajeActual;
     private int puertoEmbarqueActual;
@@ -31,32 +35,39 @@ public class PuestoAtencion {
     }
     
     //  Metodo para agregar los vuelos de la aerolinea
-    public synchronized void agregarVuelo(Vuelo vuelo){
-        mapaVuelos.put(vuelo.getNumVuelo(), vuelo);
+    public boolean agregarVuelo(Vuelo vuelo){
+        //  Debe checkear que no exista un vuelo con el mismo puerto y horario
+        boolean exito = vuelo.getTerminal().cargarVuelo(vuelo);
+        //  Si no existe un vuelo del mismo horario y puerto, agrega el vuelo
+        if(exito) mapaVuelos.put(vuelo.getNumVuelo(), vuelo);
+        return exito;
     }
     
-    public synchronized boolean eliminarVuelo(int numeroVuelo){
+    public boolean eliminarVuelo(int numeroVuelo){
         return (mapaVuelos.remove(numeroVuelo) != null);
     }
     
-    public synchronized void vaciarVuelos(){
+    public void vaciarVuelos(){
         mapaVuelos.clear();
     }
     
     //  Metodos para el hilo Pasajero
     
-    public boolean entrarCola(Semaphore semaforoPasajero){
-        return colaEspera.offer(semaforoPasajero);
-    }
-    
-    public void esperarAtencion(Semaphore semaforoPasajero) throws InterruptedException{
-        semaforoPasajero.acquire();
+    public boolean entrarCola(Pasajero pasajero) throws InterruptedException{
+        boolean exito;
+        synchronized (pasajero) {
+            exito = colaEspera.offer(pasajero);
+            if(exito) pasajero.wait();
+        }
+        return exito;
     }
     
     public void mostrarPasaje(Pasaje pasaje) throws InterruptedException{
-        this.pasajeActual = pasaje;
-        semaforoRecepcionista.release();
-        semaforoClienteActual.acquire();
+        synchronized (clienteActual) {
+            this.pasajeActual = pasaje;
+            semaforoRecepcionista.release();
+            clienteActual.wait();   
+        }
     }
     
     public Terminal recuperarTerminal(){
@@ -73,13 +84,19 @@ public class PuestoAtencion {
     
     //  Metodos para el hilo RecepcionistaCheckIn
     
-    public synchronized void esperarCliente() throws InterruptedException{
-        semaforoClienteActual = colaEspera.take();
-        semaforoGuardia.release();
+    public boolean esperarCliente() throws InterruptedException{
+        clienteActual = colaEspera.poll(ManejadorTiempo.duracionMinuto() * 5, TimeUnit.MILLISECONDS);
+        boolean exito = clienteActual != null;
+        if(exito){
+            semaforoGuardia.release();
+        }
+        return exito;
     }
     
     public void avisarCliente() throws InterruptedException{
-        semaforoClienteActual.release();
+        synchronized (clienteActual) {
+            clienteActual.notify();
+        }
         semaforoRecepcionista.acquire();
     }
     
@@ -87,10 +104,12 @@ public class PuestoAtencion {
         return mapaVuelos.get(pasajeActual.getNumVuelo());
     }
     
-    public void darInformacionCliente(Terminal terminal, int puestoEmbarque){
+    public synchronized void darInformacionCliente(Terminal terminal, int puestoEmbarque){
         terminalPasajeActual = terminal;
         puertoEmbarqueActual = puestoEmbarque;
-        semaforoClienteActual.release();
+        synchronized (clienteActual) {
+            clienteActual.notify();   
+        }
     }
     
     public void esperarclienteInformacion() throws InterruptedException{
@@ -99,7 +118,7 @@ public class PuestoAtencion {
     
     //  Metodo para el guardia
 
-    public void esperarDesocupe() throws InterruptedException{
-        semaforoGuardia.acquire();
+    public boolean esperarDesocupe() throws InterruptedException{
+        return semaforoGuardia.tryAcquire(ManejadorTiempo.duracionMinuto() * 10, TimeUnit.MILLISECONDS);
     }
 }

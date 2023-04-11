@@ -2,7 +2,7 @@ package com.mycompany.aeropuerto;
 
 import com.mycompany.aeropuerto.pasivos.Terminal;
 
-public class Vuelo{
+public class Vuelo implements Comparable<Vuelo>{
     
     private final String aerolinea;
     private final int numVuelo;
@@ -36,5 +36,9 @@ public class Vuelo{
     
     public Horario getHorario(){
         return horario;
+    }
+    
+    public int compareTo(Vuelo vuelo){
+        return horario.compareTo(vuelo.getHorario());
     }
 }

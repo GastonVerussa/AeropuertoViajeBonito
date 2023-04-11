@@ -1,6 +1,6 @@
 package com.mycompany.aeropuerto;
 
-public class Horario {
+public class Horario implements Comparable<Horario>{
 
     private final int dia;
     private final int hora;
@@ -22,5 +22,23 @@ public class Horario {
 
     public int getMinutos() {
         return minutos;
+    }
+    
+    @Override
+    public int compareTo(Horario horario){
+        int resultado;
+        resultado = dia - horario.getDia();
+        if(resultado == 0){
+            resultado = hora - horario.getHora();
+            if(resultado == 0){
+                resultado = minutos - horario.getMinutos();
+            }
+        }
+        return resultado;
+    }
+    
+    public boolean equal(Horario horario){
+        return this.dia == horario.getDia() && this.hora == horario.getHora()
+                &&  this.minutos == horario.getMinutos();
     }
 }

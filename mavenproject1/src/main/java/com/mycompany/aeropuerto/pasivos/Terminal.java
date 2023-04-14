@@ -2,6 +2,7 @@ package com.mycompany.aeropuerto.pasivos;
 
 import com.mycompany.aeropuerto.ManejadorTiempo;
 import com.mycompany.aeropuerto.Vuelo;
+import com.mycompany.aeropuerto.activos.Cajero;
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +16,7 @@ public class Terminal {
         private ArrayList<Vuelo> vuelosAsignados;
 
         public PuertoEmbarque(){
+            vuelosAsignados = new ArrayList<>(2);
         }
 
         public Vuelo getVuelo() {
@@ -65,6 +67,10 @@ public class Terminal {
         }
         int cantidadCajeros = 2;
         freeShop = new FreeShop(capacidadFreeShop, cantidadCajeros);
+        for(int i = 1; i <= cantidadCajeros; i++){
+            Cajero cajero = new Cajero(String.valueOf(i), freeShop, i);
+            cajero.start();
+        }
         manejadorAvisos = new ScheduledThreadPoolExecutor(1);
     }
     
@@ -72,18 +78,27 @@ public class Terminal {
         return nombre;
     }
     
-    public int esperarAvion(int puertoEmbarque) throws InterruptedException{
-        int respuesta;
+    //  Metodos para Pasajero
+    
+    public void esperarAvion(int puertoEmbarque) throws InterruptedException{
         PuertoEmbarque puerto = puertosEmbarque[puertoEmbarque - numPuertoInicial];
         synchronized (puerto) {
-            puerto.wait();
-            respuesta = puerto.getVuelo().getNumVuelo();
+            puerto.wait(ManejadorTiempo.duracionHora());
         }
-        return respuesta;
     }
     
     public int recuperarNumVueloPuerto(int numPuerto){
-        return puertosEmbarque[numPuerto - numPuertoInicial].getVuelo().getNumVuelo();
+        Vuelo vuelo = puertosEmbarque[numPuerto - numPuertoInicial].getVuelo();
+        int respuesta;
+        //  Se fija si hay un vuelo actual
+        if(vuelo == null){
+            //  Si no hay devuelve -1, ya que ningun vuelo podria tener ese valor
+            respuesta = -1;
+        } else {
+            //  Si hay devuelve el numero de vuelo
+            respuesta = vuelo.getNumVuelo();
+        }
+        return respuesta;
     }
  
     public boolean entrarFreeShop(){
@@ -104,6 +119,16 @@ public class Terminal {
     
     public void salirFreeShop(){
         freeShop.salir();
+    }
+    
+    //  Metodos para el Manejador Vuelos
+    
+    public int getPrimerPuerto(){
+        return numPuertoInicial;
+    }
+    
+    public int getUltimoPuerto(){
+        return numPuertoInicial + puertosEmbarque.length - 1;
     }
     
     public boolean cargarVuelo(Vuelo vuelo){

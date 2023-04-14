@@ -20,6 +20,11 @@ public class Guardia extends Thread{
     @Override
     public void run(){
         while(true){
+            try{
+                ManejadorTiempo.esperarApertura();
+            } catch(InterruptedException e){
+                imprimir("Tuve un problema esperando que se abra el aeropuerto");
+            }
             imprimir("Llegue al aeropuerto, otro dia de trabajo");
             while(ManejadorTiempo.estaAbierto()){
                 try {
@@ -34,11 +39,6 @@ public class Guardia extends Thread{
                 }
             }
             imprimir("Bueno, hora de cerrar, a descansar a mi casa, vuelvo mañana.");
-            try{
-                ManejadorTiempo.esperarApertura();
-            } catch(InterruptedException e){
-                imprimir("Tuve un problema esperando que se abra el aeropuerto");
-            }
         }
     }
     

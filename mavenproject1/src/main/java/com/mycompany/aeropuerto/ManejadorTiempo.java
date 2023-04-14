@@ -42,7 +42,7 @@ public abstract class ManejadorTiempo {
     
     //  Devuelve el tiempo que falta para el horario enviado como parametro
     public static long milisRestantesParaHorario(Horario horario){
-        //  Consigue el total de horas pasadas para el horario. Primero multiplicando los dias
+        //  Consigue el total de horas faltantes para el horario. Primero multiplicando los dias
         //      pasados (diaHorario - 1) por 24 y luego le suma las horas de ese dia.
         //      por ultimo resta la hora donde se inicio el conteo para tener las horas
         //      pasadas desde ese momento.

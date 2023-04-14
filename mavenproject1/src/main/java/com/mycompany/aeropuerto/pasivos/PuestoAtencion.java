@@ -6,8 +6,9 @@ import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 import com.mycompany.aeropuerto.Pasaje;
+import com.mycompany.aeropuerto.activos.Guardia;
 import com.mycompany.aeropuerto.activos.Pasajero;
-import java.util.Collection;
+import com.mycompany.aeropuerto.activos.RecepcionistaAtencion;
 import java.util.concurrent.TimeUnit;
 
 public class PuestoAtencion {

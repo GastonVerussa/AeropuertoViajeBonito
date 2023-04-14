@@ -3,19 +3,14 @@ package com.mycompany.aeropuerto.activos;
 import com.mycompany.aeropuerto.ManejadorTiempo;
 import com.mycompany.aeropuerto.Vuelo;
 import com.mycompany.aeropuerto.pasivos.PuestoAtencion;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class RecepcionistaAtencion extends Thread{
  
-    private final String aerolinea;
     private final PuestoAtencion puesto;
     private final String nombre;
     
-    public RecepcionistaAtencion(String nombre, String aerolinea, PuestoAtencion puestoAtencion){
+    public RecepcionistaAtencion(String nombre, PuestoAtencion puestoAtencion){
         super(nombre);
         this.nombre = nombre;
-        this.aerolinea = aerolinea;
         this.puesto = puestoAtencion;
     }
     
@@ -23,6 +18,7 @@ public class RecepcionistaAtencion extends Thread{
     public void run(){
         try {
             while(true){
+                ManejadorTiempo.esperarApertura();
                 imprimir("Llegue al aeropuerto, otro dia de trabajo");
                 while(ManejadorTiempo.estaAbierto()){
                     //  Espera un cliente
@@ -39,10 +35,9 @@ public class RecepcionistaAtencion extends Thread{
                     }
                 }
                 imprimir("Bueno, hora de cerrar, a descansar a mi casa, vuelvo mañana.");
-                ManejadorTiempo.esperarApertura();
             }
         } catch (InterruptedException ex) {
-            Logger.getLogger(RecepcionistaAtencion.class.getName()).log(Level.SEVERE, null, ex);
+            imprimir("Tuve un problema");
         }
     }
     

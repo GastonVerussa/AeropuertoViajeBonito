@@ -1,8 +1,8 @@
 package com.mycompany.aeropuerto.activos;
 
 import com.mycompany.aeropuerto.ManejadorTiempo;
-import com.mycompany.aeropuerto.Vuelo;
 import com.mycompany.aeropuerto.pasivos.Tren;
+
 public class Maquinista extends Thread{
     
     private final Tren tren;
@@ -19,6 +19,11 @@ public class Maquinista extends Thread{
     @Override
     public void run(){
         while(true){
+            try{
+                ManejadorTiempo.esperarApertura();
+            } catch(InterruptedException e){
+                imprimir("Tuve un problema esperando que se abra el aeropuerto");
+            }
             imprimir("Llegue al aeropuerto, otro dia de trabajo");
             while(ManejadorTiempo.estaAbierto()){
                 imprimir("Hora de esperar que la gente se suba");
@@ -75,11 +80,6 @@ public class Maquinista extends Thread{
                 imprimir("Bien, hora de ver que hora es");
             }
             imprimir("Bueno, hora de cerrar, a descansar a mi casa, vuelvo mañana.");
-            try{
-                ManejadorTiempo.esperarApertura();
-            } catch(InterruptedException e){
-                imprimir("Tuve un problema esperando que se abra el aeropuerto");
-            }
         }
     }
     

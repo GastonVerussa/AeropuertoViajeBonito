@@ -1,6 +1,7 @@
 package com.mycompany.aeropuerto.pasivos;
 
 import com.mycompany.aeropuerto.ManejadorTiempo;
+import com.mycompany.aeropuerto.activos.Maquinista;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;

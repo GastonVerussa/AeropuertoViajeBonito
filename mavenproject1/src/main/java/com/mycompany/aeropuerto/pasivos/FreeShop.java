@@ -1,14 +1,12 @@
 package com.mycompany.aeropuerto.pasivos;
 
 import com.mycompany.aeropuerto.ManejadorTiempo;
-import com.mycompany.aeropuerto.activos.Cajero;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class FreeShop {
 
-    private final Cajero[] cajeros;
     private final Semaphore capacidad;
     private final ReentrantLock[] mutexCajas;
     private final Semaphore[] semaforosCajeros;
@@ -16,10 +14,6 @@ public class FreeShop {
     
     public FreeShop(int capacidad, int cantidadCajeros){
         this.capacidad = new Semaphore(capacidad);
-        cajeros = new Cajero[cantidadCajeros];
-        for(int i = 0; i < cajeros.length; i++){
-            cajeros[i] = new Cajero(String.valueOf(i), this, i);
-        }
         this.semaforosCajeros = new Semaphore[cantidadCajeros];
         for(int i = 0; i < semaforosCajeros.length; i++){
             semaforosCajeros[i] = new Semaphore(0);

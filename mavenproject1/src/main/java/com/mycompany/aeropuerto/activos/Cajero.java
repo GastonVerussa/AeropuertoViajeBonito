@@ -10,8 +10,8 @@ public class Cajero extends Thread{
     private final int numCaja;
 
     public Cajero(String nombre, FreeShop freeShop, int numCaja) {
-        super(nombre);
-        this.nombre = nombre;
+        super(ManejadorTiempo.getThreadGroup(), "Cajero " + nombre);
+        this.nombre = "Cajero " + nombre;
         this.freeShop = freeShop;
         this.numCaja = numCaja;
     }
@@ -19,34 +19,53 @@ public class Cajero extends Thread{
     @Override
     public void run(){
         while(true){
-            try{
-                ManejadorTiempo.esperarApertura();
-            } catch(InterruptedException e){
-                imprimir("Tuve un problema esperando que se abra el aeropuerto");
-            }
+            while(true){
+                try{
+                    ManejadorTiempo.esperarApertura();
+                    break;
+                } catch(InterruptedException e){
+                    imprimir("Tuve un problema esperando que se abra el aeropuerto");
+                }
+            } 
             imprimir("Llegue al aeropuerto, otro dia de trabajo");
-            while(ManejadorTiempo.estaAbierto()){
-                try {
+            try{
+                while(true){
+                    imprimir("Esperando un cliente");
+                    freeShop.atenderCliente(numCaja);
+                    imprimir("Buenas, que desea comprar?");
+                    freeShop.esperarRespuestaCliente(numCaja);
+                    imprimir("Muy bien, dejeme ver el precio");
+                    //  Simula tardanza, entre 1 a 2 minutos
+                    Thread.sleep((int) (Math.random() * ManejadorTiempo.duracionMinuto() + ManejadorTiempo.duracionMinuto()));
+                    imprimir("Serían " + ((int) (Math.random() * 4000 + 500)) + " pesos.");
+                    freeShop.cobrarCliente(numCaja);
+                    imprimir("Muchas gracias, disfrute su vuelo");
+                }
+                
+                //  While si debe checkear cada tanto el tiempo
+                /*
+                while(true){
                     imprimir("Esperando un cliente");
                     if(freeShop.atenderCliente(numCaja)){
                         imprimir("Buenas, que desea comprar?");
                         freeShop.esperarRespuestaCliente(numCaja);
                         imprimir("Muy bien, dejeme ver el precio");
-                        Thread.sleep((int) (Math.random() * 1000 + 500));
+                        //  Simula tardanza, entre 1 a 2 minutos
+                        Thread.sleep((int) (Math.random() * ManejadorTiempo.duracionMinuto() + ManejadorTiempo.duracionMinuto()));
                         imprimir("Serían " + ((int) (Math.random() * 4000 + 500)) + " pesos.");
                         freeShop.cobrarCliente(numCaja);
                         imprimir("Muchas gracias, disfrute su vuelo");
                     }
                     imprimir("A ver que hora es");
-                } catch (InterruptedException ex) {
-                    imprimir("Tuve un problema");
                 }
+                */
+            } catch (InterruptedException e){
+                imprimir("Bueno, hora de cerrar, a descansar a mi casa, vuelvo mañana.");
             }
-            imprimir("Bueno, hora de cerrar, a descansar a mi casa, vuelvo mañana.");
         }
     }
     
     public void imprimir(String cadena){
-        System.out.println("Cajero " + nombre + ": " + cadena);
+        System.out.println(nombre + ": " + cadena);
     }
 }

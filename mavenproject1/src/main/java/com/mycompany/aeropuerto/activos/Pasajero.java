@@ -15,19 +15,17 @@ public class Pasajero extends Thread{
     private PuestoAtencion puestoAtencion;
     private static PuestoInformes puestoInformes;
     private static Tren tren;
-    private static HallCentral hall;
     private static Random random;
     private static GeneradorPasajes generadorPasajes;
     
     public Pasajero(String nombre){
-        super(nombre);
-        this.nombre = nombre;
+        super(ManejadorTiempo.getThreadGroup(), "Pasajero " + nombre);
+        this.nombre = "Pasajero " + nombre;
     }   
     
-    public static void setDatos(PuestoInformes puesto, Tren tren, HallCentral hall, GeneradorPasajes generadorPasajes){
+    public static void setDatos(PuestoInformes puesto, Tren tren, GeneradorPasajes generadorPasajes){
         Pasajero.puestoInformes = puesto;
         Pasajero.tren = tren;
-        Pasajero.hall = hall;
         Pasajero.random = new Random(System.currentTimeMillis());
         Pasajero.generadorPasajes = generadorPasajes;
     }
@@ -35,16 +33,25 @@ public class Pasajero extends Thread{
     @Override
     public void run(){
         imprimir("Llegue al aeropuerto");
-        try {
+                            //imprimir("Bandera 1");
+        try{
             pasaje = generadorPasajes.crearPasajeRandom();
-            imprimir("Traje mi pasaje");
-            puestoAtencion = puestoInformes.recuperarPuesto(pasaje.getAerolinea());
-            imprimir("Muchas gracias, ire al puesto de atencion de " + pasaje.getAerolinea());
-            try {
+        } catch (Exception ex) {
+            imprimir("No pude conseguir pasaje, me voy del aeropuerto. Exception: " + ex.getMessage());
+        }
+        //  Si consiguió pasaje, entonces avanza
+        if(pasaje != null){
+            try{
+                            //imprimir("Bandera 2");
+                imprimir("Traje mi pasaje, tengo el vuelo " + pasaje.getNumVuelo());
+                puestoAtencion = puestoInformes.recuperarPuesto(pasaje.getAerolinea());
+                imprimir("Muchas gracias, ire al puesto de atencion de " + pasaje.getAerolinea());
+
+                            //imprimir("Bandera 3");
                 while(!puestoAtencion.entrarCola(this)){
                     //  Va al hall central a esperar
                     imprimir("La cola esta llena, a esperar al hall");
-                    hall.esperarHall(puestoAtencion);
+                    HallCentral.esperarHall(puestoAtencion);
                     imprimir("Oh gracias guardia, a ver si puedo entrar.");
                 }
                         //imprimir("Logre entrar a la cola, ahora a esperar mi turno.");
@@ -55,37 +62,33 @@ public class Pasajero extends Thread{
                 puertoEmbarque = puestoAtencion.recuperarPuertoEmbarque();
                 imprimir("Muchas gracias, voy para alli");
                 puestoAtencion.despedirse();
-            } catch (InterruptedException ex) {
-                imprimir("Hubo un error en el puesto de atencion");
-            }
-            //  Va al tren
-            try {
+
+                            //imprimir("Bandera 4");
+                //  Va al tren
+                            //imprimir("Yendo al tren");
                 //  Espera a subirse
-                tren.subirse(terminal.getNombre());
-                imprimir("Logre subirme al tren... A la terminal " + terminal + " por favor!");
+                while(!tren.intentarSubirse(terminal.getNombre())){
+                    imprimir("No pude subirme. A esperar");
+                    tren.esperarTren();
+                }
+                imprimir("Logre subirme al tren... A la terminal " + terminal.getNombre() + " por favor!");
                 //  Espera a su parada para bajarse
                 tren.bajarse(terminal.getNombre());
                 imprimir("Muchas gracias, me bajo aca");
-            } catch (InterruptedException ex) {
-                imprimir("Error al subirse o bajarse del tren, fui interrumpido");
-            }
-            //  Llegó a la temrinal.
-            //  Se fija si tiene tiempo para el free-shop
-            if(this.comprobarTiempo()){
-                //  Si tiene tiempo, se fija si tiene ganas de ir
-                if(this.decidirRandom()){
-                    //  Si tiene tiempo y decide ir, se fija si hay espacio
-                    if(terminal.entrarFreeShop()){
-                        //  Hay espacio, entro
-                        imprimir("Entre al free-shop, vamos a ver que hay...");
-                        try{
+
+                            //imprimir("Bandera 5");
+                //  Llegó a la temrinal.
+                //  Se fija si tiene tiempo para el free-shop
+                if(this.comprobarTiempo()){
+                    //  Si tiene tiempo, se fija si tiene ganas de ir
+                    if(this.decidirRandom()){
+                        //  Si tiene tiempo y decide ir, se fija si hay espacio
+                        if(terminal.entrarFreeShop()){
+                            //  Hay espacio, entro
+                            imprimir("Entre al free-shop, vamos a ver que hay...");
                             Thread.sleep(random.nextInt(1000, 2000));
-                        } catch (InterruptedException e){
-                            imprimir("Interrupted Exception");
-                        }
-                        //  Decide si quiere comprar algo
-                        if(this.decidirRandom()){
-                            try{
+                            //  Decide si quiere comprar algo
+                            if(this.decidirRandom()){
                                 imprimir("Bueno, voy a comprar");
                                 int numCaja = terminal.irCajaFreeShop();
                                 imprimir("Buen dia deseo comprar algo");
@@ -93,25 +96,22 @@ public class Pasajero extends Thread{
                                 imprimir("Este producto quiero comprar");
                                 terminal.pagarFreeShop(numCaja);
                                 imprimir("Muy bien, tome el pago, adios!");
-                            } catch(InterruptedException e){
-                                imprimir("Error comprando");
+                            } else {
+                                imprimir("Mejor no compro nada");
                             }
+                            terminal.salirFreeShop();
+                            imprimir("Sali del free-shop");
                         } else {
-                            imprimir("Mejor no compro nada");
+                            imprimir("No hay espacio en el free-shop, una lastima");
                         }
-                        terminal.salirFreeShop();
-                        imprimir("Sali del free-shop");
                     } else {
-                        imprimir("No hay espacio en el free-shop, una lastima");
+                        imprimir("Hmm no tengo ganas de ir al free-shop");
                     }
+                                //imprimir("Bandera 6");
                 } else {
-                    imprimir("Hmm no tengo ganas de ir al free-shop");
+                    imprimir("No tengo mucho tiempo, no voy al free-shop esta vez");
                 }
-            } else {
-                imprimir("No tengo mucho tiempo, no voy al free-shop esta vez");
-            }
-            imprimir("Ahora a esperar el avion");
-            try {
+                imprimir("Ahora a esperar el avion");
                 do{
                 //  Espera que llegue su avion
                 terminal.esperarAvion(puertoEmbarque);
@@ -128,11 +128,9 @@ public class Pasajero extends Thread{
                 }
                 //  Si no era su vuelo, pero todavia no pasó el horario del suyo, sigue esperando
                 }while(true);
-            } catch (InterruptedException ex) {
-                imprimir("Tuve un problema esperando el avion");
+            } catch (InterruptedException e){
+                imprimir("El aeropuerto esta cerrando, mejor me voy");
             }
-        } catch (Exception ex) {
-            imprimir("No pude conseguir pasaje, me voy del aeropuerto");
         }
     }
     
@@ -149,6 +147,6 @@ public class Pasajero extends Thread{
     }
     
     private void imprimir(String cadena){
-        System.out.println("Pasajero " + nombre + ": " + cadena);
+        System.out.println(nombre + ": " + cadena);
     }
 }

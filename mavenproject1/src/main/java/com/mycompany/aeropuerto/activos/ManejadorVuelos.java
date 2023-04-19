@@ -15,23 +15,19 @@ public class ManejadorVuelos extends Thread{
     private int ultimoNumVuelo;
     private final String[] aerolineas;
     private final Terminal[] terminales;
-    private final int ultimoPuertoEmbarque;
     private final GeneradorPasajes generadorPasajes;
     private final PuestoInformes puestoInformes;
-    private final int CAPACIDAD_PUESTOS = 5;
     private final Random random = new Random(System.currentTimeMillis());
     private final int CANT_VUELOS_DIA;
 
-    public ManejadorVuelos(String[] aerolineas, Terminal[] terminales, int ultimoPuertoEmbarque, GeneradorPasajes generadorPasajes, PuestoInformes puestoInformes, int cantidadVuelosDia) {
+    public ManejadorVuelos(String[] aerolineas, Terminal[] terminales, GeneradorPasajes generadorPasajes, PuestoInformes puestoInformes, int cantidadVuelosDia) {
+        super(ManejadorTiempo.getThreadGroup(), "Manejador Vuelos");
         this.aerolineas = aerolineas;
         this.terminales = terminales;
-        this.ultimoPuertoEmbarque = ultimoPuertoEmbarque;
         this.generadorPasajes = generadorPasajes;
         this.puestoInformes = puestoInformes;
-        for (String aerolinea : aerolineas){
-            this.puestoInformes.agregarAerolinea(aerolinea, CAPACIDAD_PUESTOS);
-        }
         this.CANT_VUELOS_DIA = cantidadVuelosDia;
+        this.ultimoNumVuelo = 1;
     }   
     
     public void run(){
@@ -41,23 +37,18 @@ public class ManejadorVuelos extends Thread{
             for(int i = 1; i <= CANT_VUELOS_DIA; i++){
                 try {
                     this.crearVueloRandom(diaActual);
-                    System.out.println("Vuelo " + ultimoNumVuelo + " generado con exito");
                 } catch (Exception ex) {
                     Logger.getLogger(ManejadorVuelos.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+            generadorPasajes.ordenarVuelos();
             try {
-                //  Una vez que se crearon todos los vuelos espera a que abra
-                while(!ManejadorTiempo.estaAbierto()){
-                    Thread.sleep(ManejadorTiempo.duracionHora() * 2);
-                }
-                //  Y vuelva a cerrarse el aeropuerto. Esto es porque crea los vuelos
-                //      mientras esta cerrado para que esten listos en el dia
-                while(ManejadorTiempo.estaAbierto()){
+                //  Una vez que se crearon todos los vuelos espera que le avisen que cerro
+                while(true){
                     Thread.sleep(ManejadorTiempo.duracionHora() * 2);
                 }
             } catch (InterruptedException ex) {
-                System.out.println("El generador de vuelos tuvo problema durmiendo");;
+                System.out.println("ManejadorVuelos: Cerro el aeropuerto, voy preparando los vuelos de mañana");;
             }
             //  Una vez que sabe que no se utilizaran mas estos vuelos, los vacia
             this.vaciarVuelos();
@@ -83,7 +74,12 @@ public class ManejadorVuelos extends Thread{
             Horario horario = new Horario(diaActual, horaRandom, minutoRandom); 
             Vuelo vuelo = new Vuelo(aerolinea, numVuelo, horario, terminal, puertoEmbarque);
             exito = puestoInformes.agregarVuelo(vuelo);
-            if(exito)generadorPasajes.agregarVuelo(vuelo);
+            if(exito){
+                generadorPasajes.agregarVuelo(vuelo);
+            System.out.println("Vuelo " + numVuelo + " creado: aerolinea " + aerolinea 
+                    + " Terminal y puerto: " + terminal.getNombre() + ", " + puertoEmbarque 
+                    + ". Horario :" + diaActual + "/" + horaRandom + ":" + minutoRandom);
+            }
           //    Mientras no tenga exito, sigue intentando con un nuevo puerto y horario
         } while(!exito);
     }

@@ -71,9 +71,16 @@ public class FreeShop {
     
     //  Metodos para Cajero
     
+    public void atenderCliente(int numCajero) throws InterruptedException {
+        semaforosCajeros[numCajero].acquire();
+    }
+    
+    /*
+    //  Metodo que espera a atender un tiempo
     public boolean atenderCliente(int numCajero) throws InterruptedException {
         return semaforosCajeros[numCajero].tryAcquire(ManejadorTiempo.duracionMinuto() * 10, TimeUnit.MILLISECONDS);
     }
+    */
     
     public void esperarRespuestaCliente(int numCajero) throws InterruptedException {
         semaforosClientes[numCajero].release();

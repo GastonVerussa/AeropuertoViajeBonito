@@ -30,13 +30,16 @@ public class GeneradorPasajeros extends Thread{
                 //  Horario hasta que llegan los pasajeros (Ya que si llegan mas tarde es muy probable que no les de el tiempo
                 Horario horarioFinPasajeros = new Horario(diaActual, HORA_FIN_PASAJEROS, 0);
                 //  Mientras no se llegue al horario de fin
-                while(ManejadorTiempo.getHorarioActual().compareTo(horarioFinPasajeros) < 0){
-                        //  Crea un nuevo hilo pasajero
-                        Pasajero pasajero = new Pasajero(String.valueOf(numPasajero));
-                        pasajero.start();
-                        numPasajero++;
-                        //  Cada 1 a 5 minutos crea un pasajero nuevo
-                        Thread.sleep(random.nextInt(ManejadorTiempo.duracionMinuto(), ManejadorTiempo.duracionMinuto() * 5));
+                try{
+                    while(true){
+                            //  Crea un nuevo hilo pasajero
+                            Pasajero pasajero = new Pasajero(String.valueOf(numPasajero));
+                            pasajero.start();
+                            numPasajero++;
+                            //  Cada 2 a 10 minutos crea un pasajero nuevo
+                            Thread.sleep(random.nextInt(ManejadorTiempo.duracionMinuto() * 2, ManejadorTiempo.duracionMinuto() * 10));
+                    }
+                } catch (InterruptedException e){
                 }
                 diaActual++;
             } catch (InterruptedException ex) {

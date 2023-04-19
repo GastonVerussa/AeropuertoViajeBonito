@@ -5,13 +5,12 @@ import com.mycompany.aeropuerto.activos.GeneradorPasajeros;
 import com.mycompany.aeropuerto.activos.Maquinista;
 import com.mycompany.aeropuerto.activos.Pasajero;
 import com.mycompany.aeropuerto.activos.PorteroHorario;
-import com.mycompany.aeropuerto.pasivos.HallCentral;
 import com.mycompany.aeropuerto.pasivos.PuestoInformes;
 import com.mycompany.aeropuerto.pasivos.Terminal;
 import com.mycompany.aeropuerto.pasivos.Tren;
 
 public class Main {
-
+    
     public static void main(String[] args) {
         
         final int CANTIDAD_VUELOS_DIA = 15;
@@ -33,19 +32,20 @@ public class Main {
         
         GeneradorPasajes generadorPasajes = new GeneradorPasajes(CANTIDAD_VUELOS_DIA);
         PuestoInformes puestoInformes = new PuestoInformes();
-        HallCentral hall = new HallCentral();
         
         for(String aerolinea : AEROLINEAS){
+            System.out.println("For de la aerolinea " + aerolinea);
             puestoInformes.agregarAerolinea(aerolinea, CAPACIDAD_PUESTOS_ATENCION);
         }
         
-        ManejadorVuelos manejadorVuelos = new ManejadorVuelos(AEROLINEAS, terminales, ultimoPuerto, generadorPasajes, puestoInformes, CANTIDAD_VUELOS_DIA);
+        ManejadorVuelos manejadorVuelos = new ManejadorVuelos(AEROLINEAS, terminales, generadorPasajes, puestoInformes, CANTIDAD_VUELOS_DIA);
         Tren tren = new Tren(CAPACIDAD_TREN, NOMBRE_TERMINALES);
         
-        Pasajero.setDatos(puestoInformes, tren, hall, generadorPasajes);
+        Pasajero.setDatos(puestoInformes, tren, generadorPasajes);
         
         Maquinista maquinista = new Maquinista("Raul", tren, NOMBRE_TERMINALES);
         GeneradorPasajeros generadorPasajeros = new GeneradorPasajeros();
+        ManejadorTiempo.setGenerador(generadorPasajeros);
         PorteroHorario portero = new PorteroHorario();
         
         manejadorVuelos.start();

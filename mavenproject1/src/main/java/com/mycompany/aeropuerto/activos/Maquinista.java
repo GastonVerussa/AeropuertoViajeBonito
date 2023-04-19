@@ -10,8 +10,8 @@ public class Maquinista extends Thread{
     private final String[] terminalesOrden;
     
     public Maquinista(String nombre, Tren tren, String[] terminales){
-        super(nombre);
-        this.nombre = nombre;
+        super(ManejadorTiempo.getThreadGroup(), "Maquinista " + nombre);
+        this.nombre = "Maquinista " + nombre;
         this.tren = tren;
         this.terminalesOrden = terminales;
     }
@@ -19,16 +19,19 @@ public class Maquinista extends Thread{
     @Override
     public void run(){
         while(true){
-            try{
-                ManejadorTiempo.esperarApertura();
-            } catch(InterruptedException e){
-                imprimir("Tuve un problema esperando que se abra el aeropuerto");
+            while(true){
+                try{
+                    ManejadorTiempo.esperarApertura();
+                    break;
+                } catch(InterruptedException e){
+                    imprimir("Tuve un problema esperando que se abra el aeropuerto");
+                }
             }
             imprimir("Llegue al aeropuerto, otro dia de trabajo");
-            while(ManejadorTiempo.estaAbierto()){
-                imprimir("Hora de esperar que la gente se suba");
-                boolean arrancar = false;
-                try{
+            try{
+                while(true){
+                    imprimir("Hora de esperar que la gente se suba");
+                    boolean arrancar = false;
                     if(tren.esperarCapacidad()){
                         imprimir("Veo que se llenó el tren");
                         arrancar = true;
@@ -41,49 +44,36 @@ public class Maquinista extends Thread{
                             arrancar = true;
                         }
                     }
-                } catch (InterruptedException e){
-                    imprimir("Tuve un problema esperando que se llene el tren");
-                }
-                if(arrancar){
-                    imprimir("Muy bien, listos para partir");
-                    for(String terminal : terminalesOrden){
-                        imprimir("Yendo a la terminal " + terminal);
-                        try {
-                            //  Simula la espera del viaje entre terminales
-                            Thread.sleep(((int) (Math.random() * 2000)) + 1000);
-                        } catch (InterruptedException ex) {
-                            imprimir("Tuve un error viajando de terminal a terminal");
-                        }
-                        imprimir("A ver si alguien quiere bajarse en la terminal " + terminal);
-                        //  Checkea si alguien pidio bajarse en esa parada
-                        if(tren.checkearParada(terminal)){
-                            imprimir("Si. Bienvenidos a la terminal " + terminal + ". Espero que se bajen, buen viaje.");
-                            try {
+                    if(arrancar){
+                        imprimir("Muy bien, listos para partir");
+                        for(String terminal : terminalesOrden){
+                            imprimir("Yendo a la terminal " + terminal);
+                            //  Simula la espera del viaje entre terminales. Duracion: 2 a 5 min
+                            Thread.sleep(((int) (Math.random() * ManejadorTiempo.duracionMinuto() * 3)) + ManejadorTiempo.duracionMinuto() * 2);
+                            imprimir("A ver si alguien quiere bajarse en la terminal " + terminal);
+                            //  Checkea si alguien pidio bajarse en esa parada
+                            if(tren.checkearParada(terminal)){
+                                imprimir("Si. Bienvenidos a la terminal " + terminal + ". Espero que se bajen, buen viaje.");
                                 //  Si alguien pidio, se frena y espera a que se bajen
                                 tren.arribarParada(terminal);
-                            } catch (InterruptedException ex) {
-                                imprimir("Tuve un problema frenando en la terminal " + terminal);
+                                imprimir("Muy bien, ya estan todos, podemos seguir camino");
+                            } else {
+                                imprimir("Parece que nadie se quiere bajar en la terminal " + terminal + ". Pasamos de largo a la siguiente");
                             }
-                            imprimir("Muy bien, ya estan todos, podemos seguir camino");
-                        } else {
-                            imprimir("Parece que nadie se quiere bajar en la terminal " + terminal + ". Pasamos de largo a la siguiente");
                         }
-                    }
-                    imprimir("Ya terminamos con todas las terminales, volviendo a la estacion base");
-                    try {
+                        imprimir("Ya terminamos con todas las terminales, volviendo a la estacion base");
                         Thread.sleep(ManejadorTiempo.duracionMinuto());
+                        imprimir("Llegué a la estacion base");
                         tren.volverEstacionBase();
-                    } catch (InterruptedException ex) {
-                        imprimir("Tuve un problema volviendo a la estacion base.");
                     }
                 }
-                imprimir("Bien, hora de ver que hora es");
+            } catch(InterruptedException e){
+                imprimir("Bueno, hora de cerrar, a descansar a mi casa, vuelvo mañana.");
             }
-            imprimir("Bueno, hora de cerrar, a descansar a mi casa, vuelvo mañana.");
         }
     }
     
     public void imprimir(String cadena){
-        System.out.println("Maquinista " + nombre + ": " + cadena);
+        System.out.println(nombre + ": " + cadena);
     }
 }

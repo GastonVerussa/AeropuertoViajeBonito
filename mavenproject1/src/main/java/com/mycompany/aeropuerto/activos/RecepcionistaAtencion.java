@@ -9,39 +9,62 @@ public class RecepcionistaAtencion extends Thread{
     private final String nombre;
     
     public RecepcionistaAtencion(String nombre, PuestoAtencion puestoAtencion){
-        super(nombre);
-        this.nombre = nombre;
+        super(ManejadorTiempo.getThreadGroup(), "Recepcionista " + nombre);
+        this.nombre = "Recepcionista " + nombre;
         this.puesto = puestoAtencion;
+        System.out.println("Recepcionista " + nombre + ": Creado correctamente");
     }
     
     @Override
     public void run(){
-        try {
+        while(true){
             while(true){
-                ManejadorTiempo.esperarApertura();
-                imprimir("Llegue al aeropuerto, otro dia de trabajo");
-                while(ManejadorTiempo.estaAbierto()){
+                try {
+                    ManejadorTiempo.esperarApertura();
+                    break;
+                } catch(InterruptedException e){
+                    imprimir("Error esperando que abra");
+                }
+            }
+            imprimir("Llegue al aeropuerto, otro dia de trabajo");
+            try{
+                while(true){
                     //  Espera un cliente
-                    if(!puesto.esperarCliente()){
+                    puesto.esperarCliente();
+                    imprimir("Buenas, bienvenido al puesto de " + puesto.getAerolinea() + ", ¿me permite su pasaje por favor?");
+                    puesto.avisarCliente();
+                    Vuelo vueloPasajero = puesto.recuperarTerminalPuesto();
+                    imprimir("Dejeme revisar...");
+                    //  Simula la espera, tarda entre 1 a 2 minutos
+                    Thread.sleep((int) (Math.random() * ManejadorTiempo.duracionMinuto()) + ManejadorTiempo.duracionMinuto());
+                    imprimir("Su vuelo es el numero " + vueloPasajero.getNumVuelo() + ", debe ir al puesto de embarque "
+                            + vueloPasajero.getPuertoEmbarque() + " en la terminal " + vueloPasajero.getTerminal().getNombre());
+                    puesto.darInformacionCliente(vueloPasajero.getTerminal(), vueloPasajero.getPuertoEmbarque());
+                    puesto.esperarclienteInformacion();
+                    
+                    //  Bucle si debe checkear tiempo
+                    /*
+                    if(puesto.esperarCliente()){
                         imprimir("Buenas, bienvenido al puesto de " + puesto.getAerolinea() + ", ¿me permite su pasaje por favor?");
                         puesto.avisarCliente();
                         Vuelo vueloPasajero = puesto.recuperarTerminalPuesto();
                         imprimir("Dejeme revisar...");
-                        Thread.sleep((int) (Math.random() * 500) + 500);
+                        //  Simula la espera, tarda entre 1 a 2 minutos
+                        Thread.sleep((int) (Math.random() * ManejadorTiempo.duracionMinuto()) + ManejadorTiempo.duracionMinuto());
                         imprimir("Su vuelo es el numero " + vueloPasajero.getNumVuelo() + ", debe ir al puesto de embarque "
-                            + vueloPasajero.getPuertoEmbarque() + " en la terminal " + vueloPasajero.getTerminal().getNombre());
+                                + vueloPasajero.getPuertoEmbarque() + " en la terminal " + vueloPasajero.getTerminal().getNombre());
                         puesto.darInformacionCliente(vueloPasajero.getTerminal(), vueloPasajero.getPuertoEmbarque());
                         puesto.esperarclienteInformacion();
                     }
+                    */
                 }
+            } catch (InterruptedException ex) {
                 imprimir("Bueno, hora de cerrar, a descansar a mi casa, vuelvo mañana.");
             }
-        } catch (InterruptedException ex) {
-            imprimir("Tuve un problema");
         }
     }
     
     public void imprimir(String cadena){
-        System.out.println("Recepcionista " + nombre + ": " + cadena);
+        System.out.println(nombre + ": " + cadena);
     }
 }

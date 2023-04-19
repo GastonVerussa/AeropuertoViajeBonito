@@ -6,9 +6,7 @@ import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 import com.mycompany.aeropuerto.Pasaje;
-import com.mycompany.aeropuerto.activos.Guardia;
 import com.mycompany.aeropuerto.activos.Pasajero;
-import com.mycompany.aeropuerto.activos.RecepcionistaAtencion;
 import java.util.concurrent.TimeUnit;
 
 public class PuestoAtencion {
@@ -85,6 +83,13 @@ public class PuestoAtencion {
     
     //  Metodos para el hilo RecepcionistaCheckIn
     
+    public void esperarCliente() throws InterruptedException{
+        clienteActual = colaEspera.take();
+        semaforoGuardia.release();
+    }
+    
+    //  Metodo si tiene que checkear tiempo
+    /*
     public boolean esperarCliente() throws InterruptedException{
         clienteActual = colaEspera.poll(ManejadorTiempo.duracionMinuto() * 5, TimeUnit.MILLISECONDS);
         boolean exito = clienteActual != null;
@@ -93,6 +98,7 @@ public class PuestoAtencion {
         }
         return exito;
     }
+    */
     
     public void avisarCliente() throws InterruptedException{
         synchronized (clienteActual) {
@@ -119,7 +125,14 @@ public class PuestoAtencion {
     
     //  Metodo para el guardia
 
+    public void esperarDesocupe() throws InterruptedException{
+        semaforoGuardia.acquire();
+    }
+    
+    //  Metodo si tiene que checkear tiempo
+    /*
     public boolean esperarDesocupe() throws InterruptedException{
         return semaforoGuardia.tryAcquire(ManejadorTiempo.duracionMinuto() * 10, TimeUnit.MILLISECONDS);
     }
+    */
 }

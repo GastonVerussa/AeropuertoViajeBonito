@@ -67,8 +67,8 @@ public class Terminal {
         }
         int cantidadCajeros = 2;
         freeShop = new FreeShop(capacidadFreeShop, cantidadCajeros);
-        for(int i = 1; i <= cantidadCajeros; i++){
-            Cajero cajero = new Cajero(String.valueOf(i), freeShop, i);
+        for(int i = 0; i < cantidadCajeros; i++){
+            Cajero cajero = new Cajero(this.nombre + " " + i, freeShop, i);
             cajero.start();
         }
         manejadorAvisos = new ScheduledThreadPoolExecutor(1);

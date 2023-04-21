@@ -7,7 +7,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 import com.mycompany.aeropuerto.Pasaje;
 import com.mycompany.aeropuerto.activos.Pasajero;
-import java.util.concurrent.TimeUnit;
 
 public class PuestoAtencion {
 
@@ -27,6 +26,16 @@ public class PuestoAtencion {
         colaEspera = new ArrayBlockingQueue(capacidad);
         semaforoRecepcionista = new Semaphore(0);
         semaforoGuardia = new Semaphore(0);
+    }
+    
+    public void limpiar(){
+        colaEspera.clear();
+        semaforoGuardia.tryAcquire();
+        semaforoRecepcionista.tryAcquire();
+        clienteActual = null;
+        pasajeActual = null;
+        terminalPasajeActual = null;
+        puertoEmbarqueActual = 0;
     }
     
     public String getAerolinea(){

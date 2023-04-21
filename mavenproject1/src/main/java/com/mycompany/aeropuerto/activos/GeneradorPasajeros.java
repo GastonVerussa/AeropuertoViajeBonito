@@ -37,7 +37,7 @@ public class GeneradorPasajeros extends Thread{
                             pasajero.start();
                             numPasajero++;
                             //  Cada 2 a 10 minutos crea un pasajero nuevo
-                            Thread.sleep(random.nextInt(ManejadorTiempo.duracionMinuto() * 2, ManejadorTiempo.duracionMinuto() * 10));
+                            Thread.sleep(random.nextInt(ManejadorTiempo.duracionMinuto() * 1, ManejadorTiempo.duracionMinuto() * 4));
                     }
                 } catch (InterruptedException e){
                 }

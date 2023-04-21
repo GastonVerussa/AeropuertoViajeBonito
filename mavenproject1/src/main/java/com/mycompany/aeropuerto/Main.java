@@ -34,7 +34,6 @@ public class Main {
         PuestoInformes puestoInformes = new PuestoInformes();
         
         for(String aerolinea : AEROLINEAS){
-            System.out.println("For de la aerolinea " + aerolinea);
             puestoInformes.agregarAerolinea(aerolinea, CAPACIDAD_PUESTOS_ATENCION);
         }
         

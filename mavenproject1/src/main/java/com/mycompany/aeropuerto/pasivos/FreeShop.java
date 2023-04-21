@@ -1,18 +1,18 @@
 package com.mycompany.aeropuerto.pasivos;
 
-import com.mycompany.aeropuerto.ManejadorTiempo;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class FreeShop {
 
-    private final Semaphore capacidad;
+    private final int capacidadTotal;
+    private Semaphore capacidad;
     private final ReentrantLock[] mutexCajas;
     private final Semaphore[] semaforosCajeros;
     private final Semaphore[] semaforosClientes;
     
     public FreeShop(int capacidad, int cantidadCajeros){
+        capacidadTotal = capacidad;
         this.capacidad = new Semaphore(capacidad);
         this.semaforosCajeros = new Semaphore[cantidadCajeros];
         for(int i = 0; i < semaforosCajeros.length; i++){
@@ -23,6 +23,20 @@ public class FreeShop {
             semaforosClientes[i] = new Semaphore(1);
         }
         this.mutexCajas = new ReentrantLock[cantidadCajeros];
+        for(int i = 0; i < mutexCajas.length; i++){
+            mutexCajas[i] = new ReentrantLock();
+        }
+    }
+    
+    //  Reinicia los datos del free-shop para el siguiente dia
+    public void limpiar() throws InterruptedException{
+        this.capacidad = new Semaphore(capacidadTotal);
+        for(int i = 0; i < semaforosCajeros.length; i++){
+            semaforosCajeros[i] = new Semaphore(0);
+        }        
+        for(int i = 0; i < semaforosClientes.length; i++){
+            semaforosClientes[i] = new Semaphore(1);
+        }
         for(int i = 0; i < mutexCajas.length; i++){
             mutexCajas[i] = new ReentrantLock();
         }
@@ -62,6 +76,15 @@ public class FreeShop {
         semaforosClientes[cajaLibre].acquire();
         semaforosCajeros[cajaLibre].release();
         mutexCajas[cajaLibre].unlock();
+    }
+    
+    //  Metodo para cuando se va por el cierre del aeropuerto, debe liberar algún lock si tiene
+    public void irseApurado(){
+        for(ReentrantLock mutex: mutexCajas){
+            if(mutex.isHeldByCurrentThread()){
+                mutex.unlock();
+            }
+        }
     }
     
     //  Sale del free shop

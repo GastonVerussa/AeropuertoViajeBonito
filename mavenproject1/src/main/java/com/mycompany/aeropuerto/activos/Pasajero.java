@@ -89,13 +89,19 @@ public class Pasajero extends Thread{
                             Thread.sleep(random.nextInt(1000, 2000));
                             //  Decide si quiere comprar algo
                             if(this.decidirRandom()){
-                                imprimir("Bueno, voy a comprar");
-                                int numCaja = terminal.irCajaFreeShop();
-                                imprimir("Buen dia deseo comprar algo");
-                                terminal.comprarFreeShop(numCaja);
-                                imprimir("Este producto quiero comprar");
-                                terminal.pagarFreeShop(numCaja);
-                                imprimir("Muy bien, tome el pago, adios!");
+                                try {
+                                    imprimir("Bueno, voy a comprar");
+                                    int numCaja = terminal.irCajaFreeShop();
+                                    imprimir("Buen dia deseo comprar algo");
+                                    terminal.comprarFreeShop(numCaja);
+                                    imprimir("Este producto quiero comprar");
+                                    terminal.pagarFreeShop(numCaja);
+                                    imprimir("Muy bien, tome el pago, adios!");
+                                } catch (InterruptedException e){
+                                    //  Si hay problemas, se va del free-shop (Libera locks)
+                                    terminal.irseApuradoFreeShop();
+                                    throw new InterruptedException();
+                                }
                             } else {
                                 imprimir("Mejor no compro nada");
                             }

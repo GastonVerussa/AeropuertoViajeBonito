@@ -7,6 +7,10 @@ public class HallCentral {
     public HallCentral(){
     }
     
+    public static void limpiarHall(){
+        cantidadPersonas = 0;
+    }
+    
     public static void esperarHall(PuestoAtencion puestoAtencion) throws InterruptedException{
         synchronized (puestoAtencion) {
             cantidadPersonas++;

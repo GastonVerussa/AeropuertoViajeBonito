@@ -2,6 +2,7 @@ package com.mycompany.aeropuerto.activos;
 
 import com.mycompany.aeropuerto.Horario;
 import com.mycompany.aeropuerto.ManejadorTiempo;
+import com.mycompany.aeropuerto.pasivos.HallCentral;
 
 public class PorteroHorario extends Thread{
     
@@ -32,6 +33,8 @@ public class PorteroHorario extends Thread{
                 Thread.sleep(tiempoRestante);
                 imprimir("Okay, son las 22hs, hora de cerrar el aeropuerto, vuelvan todos a sus casas");
                 ManejadorTiempo.cerrar();
+                //  Limpia el hall, ver si hay un lugar mas apropiado
+                HallCentral.limpiarHall();
                 tiempoRestante = ManejadorTiempo.milisRestantesParaHorario(new Horario(diaActual + 1, HORA_APERTURA, 0));
                 Thread.sleep(tiempoRestante);
                 diaActual++;

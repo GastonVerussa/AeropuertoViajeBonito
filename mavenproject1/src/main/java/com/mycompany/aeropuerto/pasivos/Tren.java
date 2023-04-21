@@ -28,6 +28,14 @@ public class Tren {
         this.estaEnBase = true;
     }
     
+    public void limpiar() throws InterruptedException{
+        contador = new CountDownLatch(capacidad);
+        this.estaEnBase = true;
+        for(Semaphore semaforoTerminal : conteoParadas.values()){
+            semaforoTerminal.acquire(semaforoTerminal.availablePermits());
+        }
+    }
+    
     //  Metodos para el Pasajero
     
     public synchronized boolean intentarSubirse(String terminal){

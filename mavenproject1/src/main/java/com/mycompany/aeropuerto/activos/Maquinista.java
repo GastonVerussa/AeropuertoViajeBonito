@@ -69,6 +69,11 @@ public class Maquinista extends Thread{
                 }
             } catch(InterruptedException e){
                 imprimir("Bueno, hora de cerrar, a descansar a mi casa, vuelvo mañana.");
+                try{
+                    tren.limpiar();
+                } catch(InterruptedException ex){
+                    imprimir("Me interrumpieron limpiando");
+                }
             }
         }
     }

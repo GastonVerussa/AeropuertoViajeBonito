@@ -12,7 +12,6 @@ public class RecepcionistaAtencion extends Thread{
         super(ManejadorTiempo.getThreadGroup(), "Recepcionista " + nombre);
         this.nombre = "Recepcionista " + nombre;
         this.puesto = puestoAtencion;
-        System.out.println("Recepcionista " + nombre + ": Creado correctamente");
     }
     
     @Override
@@ -60,6 +59,7 @@ public class RecepcionistaAtencion extends Thread{
                 }
             } catch (InterruptedException ex) {
                 imprimir("Bueno, hora de cerrar, a descansar a mi casa, vuelvo mañana.");
+                puesto.limpiar();
             }
         }
     }

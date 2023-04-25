@@ -17,6 +17,8 @@ public class Tren {
     //  Boolean para saber si el tren esta en base
     private boolean estaEnBase;
     
+    private final int LIMITE_TIEMPO_ESPERA = ManejadorTiempo.duracionHora() / 2;
+    
     //  Constructor de parada
     public Tren(int capacidad, String[] terminales){
         this.capacidad = capacidad;
@@ -81,7 +83,7 @@ public class Tren {
     
     public boolean esperarCapacidad() throws InterruptedException{
         //  Espera que se vacie el contador (se llene el tren) o pase el tiempo designado (media hora)
-        boolean trenLleno = contador.await(ManejadorTiempo.duracionHora() / 2, TimeUnit.MILLISECONDS);
+        boolean trenLleno = contador.await(LIMITE_TIEMPO_ESPERA, TimeUnit.MILLISECONDS);
         //  Si no esta vacio, avisa que partio el tren
         if(!this.estaVacio())this.estaEnBase = false;
         //  Devuelve el boolean para decirle al maquinista si el tren esta lleno o pasó el tiempo

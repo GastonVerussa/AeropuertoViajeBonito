@@ -154,8 +154,14 @@ public class Terminal {
         public void run(){
             PuertoEmbarque puerto = puertosEmbarque[vuelo.getPuertoEmbarque() - numPuertoInicial];
             synchronized (puerto) {
-                System.out.println("Listo el embarque para el vuelo " + vuelo.getNumVuelo() + 
-                        " con la aerolinea " + vuelo.getAerolinea() + " en el puerto " + vuelo.getPuertoEmbarque());
+                int identacion = 2;
+                String cadenaFinal = "";
+                for(int i = 1; i <= identacion; i++){
+                    cadenaFinal += "---";
+                }
+                cadenaFinal += "Listo el embarque para el vuelo " + vuelo.getNumVuelo() + 
+                        " con la aerolinea " + vuelo.getAerolinea() + " en el puerto " + vuelo.getPuertoEmbarque();
+                System.out.println(cadenaFinal);
                 puerto.setVuelo(vuelo);
                 puerto.notifyAll();
             }

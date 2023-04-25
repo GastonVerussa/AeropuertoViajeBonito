@@ -40,11 +40,17 @@ public class PorteroHorario extends Thread{
                 diaActual++;
             }
         } catch (InterruptedException e) {
+            System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
+            System.out.println(" ----------------------------------------------------------- ");
             imprimir("Tuve un problema de interrupcion");
+            System.out.println(" ----------------------------------------------------------- ");
+            System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
         }
     }
     
     public void imprimir(String cadena){
+        System.out.println(" ----------------------------------------------------------- ");
         System.out.println("Portero: " + cadena);
+        System.out.println(" ----------------------------------------------------------- ");
     }
 }

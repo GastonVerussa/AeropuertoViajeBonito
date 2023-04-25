@@ -19,6 +19,7 @@ public class ManejadorVuelos extends Thread{
     private final PuestoInformes puestoInformes;
     private final Random random = new Random(System.currentTimeMillis());
     private final int CANT_VUELOS_DIA;
+    private final int DURACION_SLEEP = ManejadorTiempo.duracionHora() * 2;
 
     public ManejadorVuelos(String[] aerolineas, Terminal[] terminales, GeneradorPasajes generadorPasajes, PuestoInformes puestoInformes, int cantidadVuelosDia) {
         super(ManejadorTiempo.getThreadGroup(), "Manejador Vuelos");
@@ -45,7 +46,7 @@ public class ManejadorVuelos extends Thread{
             try {
                 //  Una vez que se crearon todos los vuelos espera que le avisen que cerro
                 while(true){
-                    Thread.sleep(ManejadorTiempo.duracionHora() * 2);
+                    Thread.sleep(DURACION_SLEEP);
                 }
             } catch (InterruptedException ex) {
                 System.out.println("ManejadorVuelos: Cerro el aeropuerto, voy preparando los vuelos de mañana");;

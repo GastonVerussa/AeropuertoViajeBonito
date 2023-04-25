@@ -23,7 +23,11 @@ public class Guardia extends Thread{
                     ManejadorTiempo.esperarApertura();
                     break;
                 } catch(InterruptedException e){
+                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
+                    System.out.println(" ----------------------------------------------------------- ");
                     imprimir("Tuve un problema esperando que se abra el aeropuerto");
+                    System.out.println(" ----------------------------------------------------------- ");
+                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
                 }
             }
             imprimir("Llegue al aeropuerto, otro dia de trabajo");
@@ -63,6 +67,12 @@ public class Guardia extends Thread{
     }
     
     public void imprimir(String cadena){
-        System.out.println(nombre + ": " + cadena);
+        int identacion = 2;
+        String cadenaFinal = "";
+        for(int i = 1; i <= identacion; i++){
+            cadenaFinal += "---";
+        }
+        cadenaFinal += nombre + ": " + cadena;
+        System.out.println(cadenaFinal);
     }
 }

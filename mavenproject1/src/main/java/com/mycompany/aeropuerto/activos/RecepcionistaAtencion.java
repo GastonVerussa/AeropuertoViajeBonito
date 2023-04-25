@@ -3,10 +3,15 @@ package com.mycompany.aeropuerto.activos;
 import com.mycompany.aeropuerto.ManejadorTiempo;
 import com.mycompany.aeropuerto.Vuelo;
 import com.mycompany.aeropuerto.pasivos.PuestoAtencion;
+import java.util.Random;
 public class RecepcionistaAtencion extends Thread{
  
     private final PuestoAtencion puesto;
     private final String nombre;
+    private final Random random = new Random(System.currentTimeMillis());
+    private final int DURACION_ATENCION_MINIMA = ManejadorTiempo.duracionMinuto() * 1;
+    private final int DURACION_ATENCION_MAXIMA = ManejadorTiempo.duracionMinuto() * 2;
+    
     
     public RecepcionistaAtencion(String nombre, PuestoAtencion puestoAtencion){
         super(ManejadorTiempo.getThreadGroup(), "Recepcionista " + nombre);
@@ -22,7 +27,11 @@ public class RecepcionistaAtencion extends Thread{
                     ManejadorTiempo.esperarApertura();
                     break;
                 } catch(InterruptedException e){
+                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
+                    System.out.println(" ----------------------------------------------------------- ");
                     imprimir("Error esperando que abra");
+                    System.out.println(" ----------------------------------------------------------- ");
+                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
                 }
             }
             imprimir("Llegue al aeropuerto, otro dia de trabajo");
@@ -35,7 +44,7 @@ public class RecepcionistaAtencion extends Thread{
                     Vuelo vueloPasajero = puesto.recuperarTerminalPuesto();
                     imprimir("Dejeme revisar...");
                     //  Simula la espera, tarda entre 1 a 2 minutos
-                    Thread.sleep((int) (Math.random() * ManejadorTiempo.duracionMinuto()) + ManejadorTiempo.duracionMinuto());
+                    Thread.sleep(random.nextInt(DURACION_ATENCION_MINIMA, DURACION_ATENCION_MAXIMA + 1));
                     imprimir("Su vuelo es el numero " + vueloPasajero.getNumVuelo() + ", debe ir al puesto de embarque "
                             + vueloPasajero.getPuertoEmbarque() + " en la terminal " + vueloPasajero.getTerminal().getNombre());
                     puesto.darInformacionCliente(vueloPasajero.getTerminal(), vueloPasajero.getPuertoEmbarque());
@@ -65,6 +74,12 @@ public class RecepcionistaAtencion extends Thread{
     }
     
     public void imprimir(String cadena){
-        System.out.println(nombre + ": " + cadena);
+        int identacion = 2;
+        String cadenaFinal = "";
+        for(int i = 1; i <= identacion; i++){
+            cadenaFinal += "---";
+        }
+        cadenaFinal += nombre + ": " + cadena;
+        System.out.println(cadenaFinal);
     }
 }

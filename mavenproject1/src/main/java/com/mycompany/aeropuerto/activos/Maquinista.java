@@ -2,12 +2,17 @@ package com.mycompany.aeropuerto.activos;
 
 import com.mycompany.aeropuerto.ManejadorTiempo;
 import com.mycompany.aeropuerto.pasivos.Tren;
+import java.util.Random;
 
 public class Maquinista extends Thread{
     
     private final Tren tren;
     private final String nombre;
     private final String[] terminalesOrden;
+    private final int DURACION_TERMINAL_MINIMA = ManejadorTiempo.duracionMinuto() * 2;
+    private final int DURACION_TERMINAL_MAXIMA = ManejadorTiempo.duracionMinuto() * 5;
+    private final int DURACION_VUELTA_BASE = ManejadorTiempo.duracionMinuto() * 3;
+    private final Random random = new Random(System.currentTimeMillis());
     
     public Maquinista(String nombre, Tren tren, String[] terminales){
         super(ManejadorTiempo.getThreadGroup(), "Maquinista " + nombre);
@@ -24,7 +29,11 @@ public class Maquinista extends Thread{
                     ManejadorTiempo.esperarApertura();
                     break;
                 } catch(InterruptedException e){
+                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
+                    System.out.println(" ----------------------------------------------------------- ");
                     imprimir("Tuve un problema esperando que se abra el aeropuerto");
+                    System.out.println(" ----------------------------------------------------------- ");
+                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
                 }
             }
             imprimir("Llegue al aeropuerto, otro dia de trabajo");
@@ -49,7 +58,7 @@ public class Maquinista extends Thread{
                         for(String terminal : terminalesOrden){
                             imprimir("Yendo a la terminal " + terminal);
                             //  Simula la espera del viaje entre terminales. Duracion: 2 a 5 min
-                            Thread.sleep(((int) (Math.random() * ManejadorTiempo.duracionMinuto() * 3)) + ManejadorTiempo.duracionMinuto() * 2);
+                            Thread.sleep(random.nextInt(DURACION_TERMINAL_MINIMA, DURACION_TERMINAL_MAXIMA + 1));
                             imprimir("A ver si alguien quiere bajarse en la terminal " + terminal);
                             //  Checkea si alguien pidio bajarse en esa parada
                             if(tren.checkearParada(terminal)){
@@ -62,7 +71,7 @@ public class Maquinista extends Thread{
                             }
                         }
                         imprimir("Ya terminamos con todas las terminales, volviendo a la estacion base");
-                        Thread.sleep(ManejadorTiempo.duracionMinuto());
+                        Thread.sleep(DURACION_VUELTA_BASE + 1);
                         imprimir("Llegué a la estacion base");
                         tren.volverEstacionBase();
                     }
@@ -72,13 +81,23 @@ public class Maquinista extends Thread{
                 try{
                     tren.limpiar();
                 } catch(InterruptedException ex){
+                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
+                    System.out.println(" ----------------------------------------------------------- ");
                     imprimir("Me interrumpieron limpiando");
+                    System.out.println(" ----------------------------------------------------------- ");
+                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
                 }
             }
         }
     }
     
     public void imprimir(String cadena){
-        System.out.println(nombre + ": " + cadena);
+        int identacion = 3;
+        String cadenaFinal = "";
+        for(int i = 1; i <= identacion; i++){
+            cadenaFinal += "---";
+        }
+        cadenaFinal += nombre + ": " + cadena;
+        System.out.println(cadenaFinal);
     }
 }

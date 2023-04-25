@@ -3,13 +3,15 @@ package com.mycompany.aeropuerto.activos;
 import com.mycompany.aeropuerto.Horario;
 import com.mycompany.aeropuerto.ManejadorTiempo;
 import java.util.Random;
-import java.util.logging.Level;
+import java.util.logging.Level; 
 import java.util.logging.Logger;
 
 public class GeneradorPasajeros extends Thread{
     
     private final Random random;
     private final int HORA_FIN_PASAJEROS = 18;
+    private final int DURACION_MINIMA = ManejadorTiempo.duracionMinuto() * 2;
+    private final int DURACION_MAXIMA = ManejadorTiempo.duracionMinuto() * 10;
     
     
     public GeneradorPasajeros(){
@@ -37,7 +39,7 @@ public class GeneradorPasajeros extends Thread{
                             pasajero.start();
                             numPasajero++;
                             //  Cada 2 a 10 minutos crea un pasajero nuevo
-                            Thread.sleep(random.nextInt(ManejadorTiempo.duracionMinuto() * 1, ManejadorTiempo.duracionMinuto() * 4));
+                            Thread.sleep(random.nextInt(DURACION_MINIMA, DURACION_MAXIMA + 1));
                     }
                 } catch (InterruptedException e){
                 }

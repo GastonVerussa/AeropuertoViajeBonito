@@ -121,10 +121,6 @@ public class Terminal {
         freeShop.salir();
     }
     
-    public void irseApuradoFreeShop(){
-        freeShop.irseApurado();
-    }
-    
     //  Metodos para el Manejador Vuelos
     
     public int getPrimerPuerto(){

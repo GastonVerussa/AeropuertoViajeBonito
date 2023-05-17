@@ -7,7 +7,7 @@ public class FreeShop {
 
     private final int capacidadTotal;
     private Semaphore capacidad;
-    private final ReentrantLock[] mutexCajas;
+    private final Semaphore[] mutexCajas;
     private final Semaphore[] semaforosCajeros;
     private final Semaphore[] semaforosClientes;
     
@@ -22,23 +22,32 @@ public class FreeShop {
         for(int i = 0; i < semaforosClientes.length; i++){
             semaforosClientes[i] = new Semaphore(1);
         }
-        this.mutexCajas = new ReentrantLock[cantidadCajeros];
+        this.mutexCajas = new Semaphore[cantidadCajeros];
         for(int i = 0; i < mutexCajas.length; i++){
-            mutexCajas[i] = new ReentrantLock();
+            mutexCajas[i] = new Semaphore(1);
         }
     }
     
     //  Reinicia los datos del free-shop para el siguiente dia
     public void limpiar() throws InterruptedException{
-        this.capacidad = new Semaphore(capacidadTotal);
-        for(int i = 0; i < semaforosCajeros.length; i++){
-            semaforosCajeros[i] = new Semaphore(0);
-        }        
-        for(int i = 0; i < semaforosClientes.length; i++){
-            semaforosClientes[i] = new Semaphore(1);
+        while(capacidad.tryAcquire()){
+            //  Primero lleva a 0 los permisos
         }
-        for(int i = 0; i < mutexCajas.length; i++){
-            mutexCajas[i] = new ReentrantLock();
+        //  Y los vuelve a la total
+        capacidad.release(capacidadTotal);
+        //  Vuelve a 0
+        for(Semaphore semaforo : semaforosCajeros){
+            semaforo.tryAcquire();
+        }        
+        //  Los setea en 1, primero volviendo a 0 de ser necesario
+        for(Semaphore semaforo : semaforosClientes){
+            semaforo.tryAcquire();
+            semaforo.release();
+        }
+        //  Los setea en 1, primero volviendo a 0 de ser necesario
+        for(Semaphore semaforo : mutexCajas){
+            semaforo.tryAcquire();
+            semaforo.release();
         }
     }
     
@@ -55,7 +64,7 @@ public class FreeShop {
         int cajaLibre = -1;
         while(cajaLibre == -1){
             for(int i = 0; i <= mutexCajas.length; i++){
-                if(mutexCajas[i].tryLock()){
+                if(mutexCajas[i].tryAcquire()){
                     cajaLibre = i;
                     break;
                 }
@@ -75,16 +84,7 @@ public class FreeShop {
     public void pagar(int cajaLibre) throws InterruptedException{
         semaforosClientes[cajaLibre].acquire();
         semaforosCajeros[cajaLibre].release();
-        mutexCajas[cajaLibre].unlock();
-    }
-    
-    //  Metodo para cuando se va por el cierre del aeropuerto, debe liberar algún lock si tiene
-    public void irseApurado(){
-        for(ReentrantLock mutex: mutexCajas){
-            if(mutex.isHeldByCurrentThread()){
-                mutex.unlock();
-            }
-        }
+        mutexCajas[cajaLibre].release();
     }
     
     //  Sale del free shop
@@ -97,13 +97,6 @@ public class FreeShop {
     public void atenderCliente(int numCajero) throws InterruptedException {
         semaforosCajeros[numCajero].acquire();
     }
-    
-    /*
-    //  Metodo que espera a atender un tiempo
-    public boolean atenderCliente(int numCajero) throws InterruptedException {
-        return semaforosCajeros[numCajero].tryAcquire(ManejadorTiempo.duracionMinuto() * 10, TimeUnit.MILLISECONDS);
-    }
-    */
     
     public void esperarRespuestaCliente(int numCajero) throws InterruptedException {
         semaforosClientes[numCajero].release();

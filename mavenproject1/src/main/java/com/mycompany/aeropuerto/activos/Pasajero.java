@@ -21,7 +21,7 @@ public class Pasajero extends Thread{
     private final int DURACION_PASEO_FREESHOP_MAXIMA = ManejadorTiempo.duracionMinuto() * 15;
     
     public Pasajero(String nombre){
-        super(ManejadorTiempo.getThreadGroup(), "Pasajero " + nombre);
+        super(PuertasAeropuerto.getThreadGroup(), "Pasajero " + nombre);
         this.nombre = "Pasajero " + nombre;
     }   
     
@@ -75,7 +75,7 @@ public class Pasajero extends Thread{
                 }
                 imprimir("Logre subirme al tren... A la terminal " + terminal.getNombre() + " por favor!", 3);
                 //  Espera a su parada para bajarse
-                tren.bajarse(terminal.getNombre());
+                tren.esperarBajarse(terminal.getNombre());
                 imprimir("Muchas gracias, me bajo aca", 3);
 
                             //imprimir("Bandera 5");
@@ -91,7 +91,6 @@ public class Pasajero extends Thread{
                             Thread.sleep(random.nextInt(DURACION_PASEO_FREESHOP_MINIMA, DURACION_PASEO_FREESHOP_MAXIMA + 1));
                             //  Decide si quiere comprar algo
                             if(this.decidirRandom()){
-                                //try {
                                 imprimir("Bueno, voy a comprar", 4);
                                 int numCaja = terminal.irCajaFreeShop();
                                 imprimir("Buen dia deseo comprar algo", 4);
@@ -99,13 +98,6 @@ public class Pasajero extends Thread{
                                 imprimir("Este producto quiero comprar", 4);
                                 terminal.pagarFreeShop(numCaja);
                                 imprimir("Muy bien, tome el pago, adios!", 4);
-                                    /*
-                                } catch (InterruptedException e){
-                                    //  Si hay problemas, se va del free-shop (Libera locks)
-                                    terminal.irseApuradoFreeShop();
-                                    throw new InterruptedException();
-                                }
-                                    */
                             } else {
                                 imprimir("Mejor no compro nada", 4);
                             }

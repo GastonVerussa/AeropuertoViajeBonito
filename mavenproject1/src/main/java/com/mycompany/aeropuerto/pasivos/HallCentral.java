@@ -11,7 +11,9 @@ public class HallCentral {
         cantidadPersonas = 0;
     }
     
-    public static void esperarHall(PuestoAtencion puestoAtencion) throws InterruptedException{
+    //  Metodo para que el pasajero espere en el hall cuando la cola este llena
+    //      es synchronized por la variable cantidadPersonas.
+    public synchronized static void esperarHall(PuestoAtencion puestoAtencion) throws InterruptedException{
         synchronized (puestoAtencion) {
             cantidadPersonas++;
             puestoAtencion.wait();
@@ -19,6 +21,7 @@ public class HallCentral {
         }
     }
     
+    //  Metodo para que el guardia avise que se libero un lugar para el puesto de atencion. 
     public static void avisarHall(PuestoAtencion puestoAtencion){
         synchronized (puestoAtencion) {
             puestoAtencion.notify();

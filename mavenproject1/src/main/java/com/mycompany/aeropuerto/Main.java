@@ -5,6 +5,7 @@ import com.mycompany.aeropuerto.activos.GeneradorPasajeros;
 import com.mycompany.aeropuerto.activos.Maquinista;
 import com.mycompany.aeropuerto.activos.Pasajero;
 import com.mycompany.aeropuerto.activos.PorteroHorario;
+import com.mycompany.aeropuerto.pasivos.PuertasAeropuerto;
 import com.mycompany.aeropuerto.pasivos.PuestoInformes;
 import com.mycompany.aeropuerto.pasivos.Terminal;
 import com.mycompany.aeropuerto.pasivos.Tren;
@@ -44,7 +45,7 @@ public class Main {
         
         Maquinista maquinista = new Maquinista("Raul", tren, NOMBRE_TERMINALES);
         GeneradorPasajeros generadorPasajeros = new GeneradorPasajeros();
-        ManejadorTiempo.setGenerador(generadorPasajeros);
+        PuertasAeropuerto.setGenerador(generadorPasajeros);
         PorteroHorario portero = new PorteroHorario();
         
         manejadorVuelos.start();

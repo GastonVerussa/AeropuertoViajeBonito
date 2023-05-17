@@ -3,6 +3,7 @@ package com.mycompany.aeropuerto.activos;
 import com.mycompany.aeropuerto.Horario;
 import com.mycompany.aeropuerto.ManejadorTiempo;
 import com.mycompany.aeropuerto.pasivos.HallCentral;
+import com.mycompany.aeropuerto.pasivos.PuertasAeropuerto;
 
 public class PorteroHorario extends Thread{
     
@@ -21,22 +22,56 @@ public class PorteroHorario extends Thread{
         ManejadorTiempo.setTiempoInicial(System.currentTimeMillis());
         try {
             Thread.sleep(ManejadorTiempo.duracionHora());
+            Horario siguienteHorario = new Horario(1, 0, 0);
             long tiempoRestante;
             while(true){
                 imprimir("Bueno, son las 6AM, hora de abrir el aeropuerto");
-                ManejadorTiempo.abrir();
-                tiempoRestante = ManejadorTiempo.milisRestantesParaHorario(new Horario(diaActual, HORA_FIN_INGRESO_PASAJEROS, 0));
-                Thread.sleep(tiempoRestante);
+                PuertasAeropuerto.abrir();
+                siguienteHorario.setDatos(diaActual, HORA_FIN_INGRESO_PASAJEROS, 0);
+                tiempoRestante = ManejadorTiempo.milisRestantesParaHorario(siguienteHorario);
+                if(tiempoRestante > 0){
+                    Thread.sleep(tiempoRestante);
+                } else {
+                    imprimir("-------------------------------------");
+                    imprimir("ERROR, PORTERO ATRASADO. TIEMPO DE ESPERA NEGATIVO");
+                    imprimir("Dia actual mio: " + diaActual + ", Dia actual segun manejador: " + ManejadorTiempo.getHorarioActual().getDia());
+                    imprimir("Horario al que debo avisar " + siguienteHorario.toString());
+                    imprimir("Horario actual segun manejador " + ManejadorTiempo.getHorarioActual().toString());
+                    imprimir("Diferencia milis segun manejador " + ManejadorTiempo.milisRestantesParaHorario(siguienteHorario));
+                    imprimir("-------------------------------------");
+                }
                 imprimir("Okay, son las 18hs, ya no ingresan mas pasajeros, no les da el tiempo");
-                ManejadorTiempo.cerrarIngreso();
-                tiempoRestante = ManejadorTiempo.milisRestantesParaHorario(new Horario(diaActual, HORA_CIERRE, 0));
-                Thread.sleep(tiempoRestante);
+                PuertasAeropuerto.cerrarIngreso();
+                siguienteHorario.setDatos(diaActual, HORA_CIERRE, 0);
+                tiempoRestante = ManejadorTiempo.milisRestantesParaHorario(siguienteHorario);
+                if(tiempoRestante > 0){
+                    Thread.sleep(tiempoRestante);
+                } else {
+                    imprimir("-------------------------------------");
+                    imprimir("ERROR, PORTERO ATRASADO. TIEMPO DE ESPERA NEGATIVO");
+                    imprimir("Dia actual mio: " + diaActual + ", Dia actual segun manejador: " + ManejadorTiempo.getHorarioActual().getDia());
+                    imprimir("Horario al que debo avisar " + siguienteHorario.toString());
+                    imprimir("Horario actual segun manejador " + ManejadorTiempo.getHorarioActual().toString());
+                    imprimir("Diferencia milis segun manejador " + ManejadorTiempo.milisRestantesParaHorario(siguienteHorario));
+                    imprimir("-------------------------------------");
+                }
                 imprimir("Okay, son las 22hs, hora de cerrar el aeropuerto, vuelvan todos a sus casas");
-                ManejadorTiempo.cerrar();
+                PuertasAeropuerto.cerrar();
                 //  Limpia el hall, ver si hay un lugar mas apropiado
                 HallCentral.limpiarHall();
-                tiempoRestante = ManejadorTiempo.milisRestantesParaHorario(new Horario(diaActual + 1, HORA_APERTURA, 0));
-                Thread.sleep(tiempoRestante);
+                siguienteHorario.setDatos(diaActual + 1, HORA_APERTURA, 0);
+                tiempoRestante = ManejadorTiempo.milisRestantesParaHorario(siguienteHorario);
+                if(tiempoRestante > 0){
+                    Thread.sleep(tiempoRestante);
+                } else {
+                    imprimir("-------------------------------------");
+                    imprimir("ERROR, PORTERO ATRASADO. TIEMPO DE ESPERA NEGATIVO");
+                    imprimir("Dia actual mio: " + diaActual + ", Dia actual segun manejador: " + ManejadorTiempo.getHorarioActual().getDia());
+                    imprimir("Horario al que debo avisar " + siguienteHorario.toString());
+                    imprimir("Horario actual segun manejador " + ManejadorTiempo.getHorarioActual().toString());
+                    imprimir("Diferencia milis segun manejador " + ManejadorTiempo.milisRestantesParaHorario(siguienteHorario));
+                    imprimir("-------------------------------------");
+                }
                 diaActual++;
             }
         } catch (InterruptedException e) {

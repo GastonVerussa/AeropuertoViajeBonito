@@ -2,6 +2,7 @@ package com.mycompany.aeropuerto.activos;
 
 import com.mycompany.aeropuerto.ManejadorTiempo;
 import com.mycompany.aeropuerto.Vuelo;
+import com.mycompany.aeropuerto.pasivos.PuertasAeropuerto;
 import com.mycompany.aeropuerto.pasivos.PuestoAtencion;
 import java.util.Random;
 public class RecepcionistaAtencion extends Thread{
@@ -14,7 +15,7 @@ public class RecepcionistaAtencion extends Thread{
     
     
     public RecepcionistaAtencion(String nombre, PuestoAtencion puestoAtencion){
-        super(ManejadorTiempo.getThreadGroup(), "Recepcionista " + nombre);
+        super(PuertasAeropuerto.getThreadGroup(), "Recepcionista " + nombre);
         this.nombre = "Recepcionista " + nombre;
         this.puesto = puestoAtencion;
     }
@@ -22,18 +23,7 @@ public class RecepcionistaAtencion extends Thread{
     @Override
     public void run(){
         while(true){
-            while(true){
-                try {
-                    ManejadorTiempo.esperarApertura();
-                    break;
-                } catch(InterruptedException e){
-                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
-                    System.out.println(" ----------------------------------------------------------- ");
-                    imprimir("Error esperando que abra");
-                    System.out.println(" ----------------------------------------------------------- ");
-                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
-                }
-            }
+            PuertasAeropuerto.esperarApertura();
             imprimir("Llegue al aeropuerto, otro dia de trabajo");
             try{
                 while(true){

@@ -2,14 +2,14 @@ package com.mycompany.aeropuerto;
 
 public class Horario implements Comparable<Horario>{
 
-    private final int dia;
-    private final int hora;
-    private final int minutos;
+    private int dia;
+    private int hora;
+    private int minutos;
 
-    public Horario(int dia, int Hora, int Minutos) {
+    public Horario(int dia, int hora, int minutos) {
         this.dia = dia;
-        this.hora = Hora;
-        this.minutos = Minutos;
+        this.hora = hora;
+        this.minutos = minutos;
     }
 
     public int getDia(){
@@ -22,6 +22,12 @@ public class Horario implements Comparable<Horario>{
 
     public int getMinutos() {
         return minutos;
+    }
+    
+    public void setDatos(int dia, int hora, int minutos){
+        this.dia = dia;
+        this.hora = hora;
+        this.minutos = minutos;
     }
     
     @Override
@@ -37,8 +43,13 @@ public class Horario implements Comparable<Horario>{
         return resultado;
     }
     
-    public boolean equal(Horario horario){
+    public boolean equals(Horario horario){
         return this.dia == horario.getDia() && this.hora == horario.getHora()
                 &&  this.minutos == horario.getMinutos();
+    }
+    
+    @Override
+    public String toString(){
+        return "dia " + dia + " a las " + hora + "/" + minutos + "hs";
     }
 }

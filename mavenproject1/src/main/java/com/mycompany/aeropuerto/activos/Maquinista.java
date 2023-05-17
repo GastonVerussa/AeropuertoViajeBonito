@@ -1,6 +1,7 @@
 package com.mycompany.aeropuerto.activos;
 
 import com.mycompany.aeropuerto.ManejadorTiempo;
+import com.mycompany.aeropuerto.pasivos.PuertasAeropuerto;
 import com.mycompany.aeropuerto.pasivos.Tren;
 import java.util.Random;
 
@@ -15,7 +16,7 @@ public class Maquinista extends Thread{
     private final Random random = new Random(System.currentTimeMillis());
     
     public Maquinista(String nombre, Tren tren, String[] terminales){
-        super(ManejadorTiempo.getThreadGroup(), "Maquinista " + nombre);
+        super(PuertasAeropuerto.getThreadGroup(), "Maquinista " + nombre);
         this.nombre = "Maquinista " + nombre;
         this.tren = tren;
         this.terminalesOrden = terminales;
@@ -24,18 +25,7 @@ public class Maquinista extends Thread{
     @Override
     public void run(){
         while(true){
-            while(true){
-                try{
-                    ManejadorTiempo.esperarApertura();
-                    break;
-                } catch(InterruptedException e){
-                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
-                    System.out.println(" ----------------------------------------------------------- ");
-                    imprimir("Tuve un problema esperando que se abra el aeropuerto");
-                    System.out.println(" ----------------------------------------------------------- ");
-                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
-                }
-            }
+            PuertasAeropuerto.esperarApertura();
             imprimir("Llegue al aeropuerto, otro dia de trabajo");
             try{
                 while(true){

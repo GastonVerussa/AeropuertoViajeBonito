@@ -4,6 +4,7 @@ import com.mycompany.aeropuerto.GeneradorPasajes;
 import com.mycompany.aeropuerto.Horario;
 import com.mycompany.aeropuerto.ManejadorTiempo;
 import com.mycompany.aeropuerto.Vuelo;
+import com.mycompany.aeropuerto.pasivos.PuertasAeropuerto;
 import com.mycompany.aeropuerto.pasivos.PuestoInformes;
 import com.mycompany.aeropuerto.pasivos.Terminal;
 import java.util.Random;
@@ -22,7 +23,7 @@ public class ManejadorVuelos extends Thread{
     private final int DURACION_SLEEP = ManejadorTiempo.duracionHora() * 2;
 
     public ManejadorVuelos(String[] aerolineas, Terminal[] terminales, GeneradorPasajes generadorPasajes, PuestoInformes puestoInformes, int cantidadVuelosDia) {
-        super(ManejadorTiempo.getThreadGroup(), "Manejador Vuelos");
+        super(PuertasAeropuerto.getThreadGroup(), "Manejador Vuelos");
         this.aerolineas = aerolineas;
         this.terminales = terminales;
         this.generadorPasajes = generadorPasajes;
@@ -78,23 +79,11 @@ public class ManejadorVuelos extends Thread{
             if(exito){
                 generadorPasajes.agregarVuelo(vuelo);
             System.out.println("Vuelo " + numVuelo + " creado: aerolinea " + aerolinea 
-                    + " Terminal y puerto: " + terminal.getNombre() + ", " + puertoEmbarque 
-                    + ". Horario :" + diaActual + "/" + horaRandom + ":" + minutoRandom);
+                    + ". Terminal y puerto: " + terminal.getNombre() + ", " + puertoEmbarque 
+                    + ". Horario : dia " + diaActual + " / " + horaRandom + ":" + minutoRandom);
             }
           //    Mientras no tenga exito, sigue intentando con un nuevo puerto y horario
         } while(!exito);
-    }
-    
-    //  Si no fue borrado exitosamente de ambos lados lo deja como estaba
-    private boolean eliminarVuelo(Vuelo vuelo){
-        boolean exito = generadorPasajes.eliminarVuelo(vuelo);
-        if(exito){
-            exito = puestoInformes.eliminarVuelo(vuelo);
-            if(!exito){
-                generadorPasajes.agregarVuelo(vuelo);
-            }
-        }
-        return exito;
     }
     
     private void vaciarVuelos(){

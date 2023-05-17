@@ -2,6 +2,7 @@ package com.mycompany.aeropuerto.activos;
 
 import com.mycompany.aeropuerto.ManejadorTiempo;
 import com.mycompany.aeropuerto.pasivos.FreeShop;
+import com.mycompany.aeropuerto.pasivos.PuertasAeropuerto;
 import java.util.Random;
 
 public class Cajero extends Thread{
@@ -14,7 +15,7 @@ public class Cajero extends Thread{
     private final Random random = new Random(System.currentTimeMillis());
 
     public Cajero(String nombre, FreeShop freeShop, int numCaja) {
-        super(ManejadorTiempo.getThreadGroup(), "Cajero " + nombre);
+        super(PuertasAeropuerto.getThreadGroup(), "Cajero " + nombre);
         this.nombre = "Cajero " + nombre;
         this.freeShop = freeShop;
         this.numCaja = numCaja;
@@ -23,18 +24,8 @@ public class Cajero extends Thread{
     @Override
     public void run(){
         while(true){
-            while(true){
-                try{
-                    ManejadorTiempo.esperarApertura();
-                    break;
-                } catch(InterruptedException e){
-                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
-                    System.out.println(" ----------------------------------------------------------- ");
-                    imprimir("Tuve un problema esperando que se abra el aeropuerto");
-                    System.out.println(" ----------------------------------------------------------- ");
-                    System.out.println(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ");
-                }
-            } 
+            //  Espera a que abran el aeropuerto
+            PuertasAeropuerto.esperarApertura();
             imprimir("Llegue al aeropuerto, otro dia de trabajo");
             try{
                 while(true){
@@ -49,24 +40,6 @@ public class Cajero extends Thread{
                     freeShop.cobrarCliente(numCaja);
                     imprimir("Muchas gracias, disfrute su vuelo");
                 }
-                
-                //  While si debe checkear cada tanto el tiempo
-                /*
-                while(true){
-                    imprimir("Esperando un cliente");
-                    if(freeShop.atenderCliente(numCaja)){
-                        imprimir("Buenas, que desea comprar?");
-                        freeShop.esperarRespuestaCliente(numCaja);
-                        imprimir("Muy bien, dejeme ver el precio");
-                        //  Simula tardanza, entre 1 a 2 minutos
-                        Thread.sleep((int) (Math.random() * ManejadorTiempo.duracionMinuto() + ManejadorTiempo.duracionMinuto()));
-                        imprimir("Serían " + ((int) (Math.random() * 4000 + 500)) + " pesos.");
-                        freeShop.cobrarCliente(numCaja);
-                        imprimir("Muchas gracias, disfrute su vuelo");
-                    }
-                    imprimir("A ver que hora es");
-                }
-                */
             } catch (InterruptedException e){
                 imprimir("Bueno, hora de cerrar, a descansar a mi casa, vuelvo mañana.");
                 try {

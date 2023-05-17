@@ -6,14 +6,36 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-
 public class Tren {
+    
+    private class Contador{
+     
+        private int conteo;
+        
+        public Contador(){
+            conteo = 0;
+        }
+        
+        public synchronized void sumarUno(){
+            conteo++;
+        }
+        
+        public synchronized int get(){
+            return conteo;
+        }
+        
+        public synchronized void reiniciar(){
+            conteo = 0;
+        }
+    }
     
     private final int capacidad;
     //  CountDownLatch utilizado para que el tren espere que todos se suban
     private CountDownLatch contador;
+    //  Un mapa que contiene un contador protegido para cada parada
+    private final HashMap<String, Contador> contadoresParada;
     //  Un mapa que contiene los semaforos usados para cada parada
-    private final HashMap<String, Semaphore> conteoParadas;
+    private final HashMap<String, Semaphore> semaforosParada;
     //  Boolean para saber si el tren esta en base
     private boolean estaEnBase;
     
@@ -23,9 +45,13 @@ public class Tren {
     public Tren(int capacidad, String[] terminales){
         this.capacidad = capacidad;
         contador = new CountDownLatch(capacidad);
-        conteoParadas = new HashMap(terminales.length);
+        semaforosParada = new HashMap(terminales.length);
         for (String terminal : terminales) {
-            conteoParadas.put(terminal, new Semaphore(0));
+            semaforosParada.put(terminal, new Semaphore(0));
+        }
+        contadoresParada = new HashMap(terminales.length);
+        for (String terminal : terminales) {
+            contadoresParada.put(terminal, new Contador());
         }
         this.estaEnBase = true;
     }
@@ -33,8 +59,14 @@ public class Tren {
     public void limpiar() throws InterruptedException{
         contador = new CountDownLatch(capacidad);
         this.estaEnBase = true;
-        for(Semaphore semaforoTerminal : conteoParadas.values()){
-            semaforoTerminal.acquire(semaforoTerminal.availablePermits());
+        for(Semaphore semaforoTerminal : semaforosParada.values()){
+            while(semaforoTerminal.tryAcquire()){
+                // Vuelve a 0 los semaforos
+            }
+        }
+        //  Reinicia todos los contadores
+        for(Contador conteo : contadoresParada.values()){
+            conteo.reiniciar();
         }
     }
     
@@ -42,24 +74,15 @@ public class Tren {
     
     public synchronized boolean intentarSubirse(String terminal){
         boolean exito;
-                                //System.out.println(Thread.currentThread().getName() + ": Voy a intentar subirme.");
-        //  Checkea que haya espacio en el tren
+        //  Checkea que haya espacio en el tren y este en la base
         if(contador.getCount() == 0 || !estaEnBase){
-            if(!estaEnBase){
-                                //System.out.println(Thread.currentThread().getName() + ": Esperando el tren. No esta en base.");
-            } else {
-                                //System.out.println(Thread.currentThread().getName() + ": Esperando el tren. Esta lleno.");
-            }
             exito = false;
-            //barrera.isBroken()
-            //  Si no hay, espera a que vuelva el tren y checkea de nuevo
+            //  Si no hay o no esta, espera a que vuelva el tren y checkea de nuevo
         } else {
             exito = true;
-                                //System.out.println(Thread.currentThread().getName() + ": Parece que esta todo bien, libero semaforo.");
             //  Avisa que se va a bajar en la parada correspondiente
-            conteoParadas.get(terminal).release();
+            contadoresParada.get(terminal).sumarUno();
             //  Se sube al tren
-                                //System.out.println(Thread.currentThread().getName() + ": Bajo contador.");
             contador.countDown();
         }
         return exito;
@@ -69,14 +92,9 @@ public class Tren {
         this.wait();
     }
     
-    public void bajarse(String terminal) throws InterruptedException{
-        Semaphore semaforoTerminal = conteoParadas.get(terminal);
-        synchronized (semaforoTerminal) {
-            //  Espera que se llegue a la parada
-            semaforoTerminal.wait();
-        }
-        //  Se baja
-        conteoParadas.get(terminal).acquire();
+    public void esperarBajarse(String terminal) throws InterruptedException{
+        //  Espera para bajarse
+        semaforosParada.get(terminal).acquire();
     }
     
     //  Metodos para el Maquinista
@@ -97,15 +115,16 @@ public class Tren {
     
     //  Se fija si alguien pidio bajarse en esa terminal
     public boolean checkearParada(String terminal){
-        return conteoParadas.get(terminal).availablePermits() != 0;
+        return contadoresParada.get(terminal).get() != 0;
     }
     
     public void arribarParada(String terminal) throws InterruptedException{
-        Semaphore semaforoTerminal = conteoParadas.get(terminal);
-        synchronized (semaforoTerminal) {
-            //  Avisa que se llego a la parada
-            semaforoTerminal.notifyAll();
-        }
+        //  Consigue el semaforo
+        Semaphore semaforoTerminal = semaforosParada.get(terminal);
+        //  Libera una cantidad de permisos igual a los que pidieron bajarse
+        semaforoTerminal.release(contadoresParada.get(terminal).get());
+        //  Reinicia el contador
+        contadoresParada.get(terminal).reiniciar();
         //  Espera que se bajen todos los pasajeros de la parada
         while(semaforoTerminal.availablePermits() != 0){
             Thread.sleep(ManejadorTiempo.duracionMinuto());

@@ -2,33 +2,19 @@ package com.mycompany.aeropuerto;
 
 //  Una clase para manejar el tiempo, abstracta ya que no se necesitan crear instancia.
 
-import com.mycompany.aeropuerto.activos.GeneradorPasajeros;
-
 //      Todos sus metodos son estaticos
 public abstract class ManejadorTiempo {
     
     private static long tiempoInicial;
-    private static final Object monitorAbierto = new Object();
     
     private static final int HORA_INICIAL = 5;
     
     private static final int DURACION_MINUTO = 50;
     private static final int DURACION_HORA = DURACION_MINUTO * 60;
     
-    private static ThreadGroup hilosPersonas = new ThreadGroup("personas");
-    private static GeneradorPasajeros generadorPasajeros;
-    
     //  Se debe guardar cual fue el tiempo inicial antes de utilizar cualquier otro metodo
     public static void setTiempoInicial(long tiempo){
         ManejadorTiempo.tiempoInicial = tiempo;
-    }
-    
-    public static ThreadGroup getThreadGroup(){
-        return hilosPersonas;
-    }
-    
-    public static void setGenerador(GeneradorPasajeros generadorPasajeros){
-        ManejadorTiempo.generadorPasajeros = generadorPasajeros;
     }
     
     //  Devuelve cuantos milisegundos pasaron
@@ -78,25 +64,5 @@ public abstract class ManejadorTiempo {
     //  Devuelve el valor de la duracion en milisegundos para un Minuto
     public static int duracionMinuto(){
         return DURACION_MINUTO;
-    }
-    
-    public static void abrir(){
-        synchronized (monitorAbierto) {
-            monitorAbierto.notifyAll();
-        }
-    }
-    
-    public static void cerrarIngreso(){
-        generadorPasajeros.interrupt();
-    }
-    
-    public static void cerrar(){
-        hilosPersonas.interrupt();
-    }
-    
-    public static void esperarApertura() throws InterruptedException{
-        synchronized (monitorAbierto) {
-            monitorAbierto.wait();
-        }
     }
 }

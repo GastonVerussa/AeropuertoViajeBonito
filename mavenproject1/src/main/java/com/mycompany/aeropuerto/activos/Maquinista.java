@@ -1,6 +1,6 @@
 package com.mycompany.aeropuerto.activos;
 
-import com.mycompany.aeropuerto.ManejadorTiempo;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.ManejadorTiempo;
 import com.mycompany.aeropuerto.pasivos.PuertasAeropuerto;
 import com.mycompany.aeropuerto.pasivos.Tren;
 import java.util.Random;

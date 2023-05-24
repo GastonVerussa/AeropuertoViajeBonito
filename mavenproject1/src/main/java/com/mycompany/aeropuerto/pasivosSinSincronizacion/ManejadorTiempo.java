@@ -1,8 +1,6 @@
-package com.mycompany.aeropuerto;
+package com.mycompany.aeropuerto.pasivosSinSincronizacion;
 
 //  Una clase para manejar el tiempo, abstracta ya que no se necesitan crear instancia.
-
-//      Todos sus metodos son estaticos
 public abstract class ManejadorTiempo {
     
     private static long tiempoInicial;

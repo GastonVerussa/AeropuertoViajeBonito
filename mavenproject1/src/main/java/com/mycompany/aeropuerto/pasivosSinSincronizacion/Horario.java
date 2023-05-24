@@ -1,4 +1,4 @@
-package com.mycompany.aeropuerto;
+package com.mycompany.aeropuerto.pasivosSinSincronizacion;
 
 public class Horario implements Comparable<Horario>{
 
@@ -50,6 +50,6 @@ public class Horario implements Comparable<Horario>{
     
     @Override
     public String toString(){
-        return "dia " + dia + " a las " + hora + "/" + minutos + "hs";
+        return "dia " + dia + " a las " + hora + ":" + minutos + "hs";
     }
 }

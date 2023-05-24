@@ -1,11 +1,11 @@
 package com.mycompany.aeropuerto.activos;
 
-import com.mycompany.aeropuerto.GeneradorPasajes;
-import com.mycompany.aeropuerto.Horario;
-import com.mycompany.aeropuerto.ManejadorTiempo;
-import com.mycompany.aeropuerto.Vuelo;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.GeneradorPasajes;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.Horario;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.ManejadorTiempo;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.Vuelo;
 import com.mycompany.aeropuerto.pasivos.PuertasAeropuerto;
-import com.mycompany.aeropuerto.pasivos.PuestoInformes;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.PuestoInformes;
 import com.mycompany.aeropuerto.pasivos.Terminal;
 import java.util.Random;
 import java.util.logging.Level;

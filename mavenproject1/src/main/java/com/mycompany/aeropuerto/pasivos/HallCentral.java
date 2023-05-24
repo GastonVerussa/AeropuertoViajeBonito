@@ -1,5 +1,7 @@
 package com.mycompany.aeropuerto.pasivos;
 
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.ManejadorTiempo;
+
 public class HallCentral {
     
     private static int cantidadPersonas = 0;
@@ -16,7 +18,8 @@ public class HallCentral {
     public synchronized static void esperarHall(PuestoAtencion puestoAtencion) throws InterruptedException{
         synchronized (puestoAtencion) {
             cantidadPersonas++;
-            puestoAtencion.wait();
+            //  Timeout por si justo entre que no pudo entrar a la cola y vino a esperar ya se liberaron todos los espacios.
+            puestoAtencion.wait(ManejadorTiempo.duracionMinuto() * 10);
             cantidadPersonas--;
         }
     }
@@ -29,7 +32,7 @@ public class HallCentral {
     }
     
     //  Devuelve si hay alguien esperando en todo el hall
-    public static boolean hayAlguien(){
+    public synchronized static boolean hayAlguien(){
         return cantidadPersonas != 0;
     }
 }

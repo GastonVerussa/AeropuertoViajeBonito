@@ -1,4 +1,6 @@
-package com.mycompany.aeropuerto;
+package com.mycompany.aeropuerto.pasivosSinSincronizacion;
+
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.Horario;
 
 public class Pasaje {
     

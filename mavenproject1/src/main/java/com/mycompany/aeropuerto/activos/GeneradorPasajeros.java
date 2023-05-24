@@ -1,7 +1,7 @@
 package com.mycompany.aeropuerto.activos;
 
-import com.mycompany.aeropuerto.Horario;
-import com.mycompany.aeropuerto.ManejadorTiempo;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.Horario;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.ManejadorTiempo;
 import com.mycompany.aeropuerto.pasivos.PuertasAeropuerto;
 import java.util.Random;
 
@@ -43,6 +43,7 @@ public class GeneradorPasajeros extends Thread{
                 //  Fue interrumpido, avisando el cierre al ingreso de pasajeros
             }
             try{
+                //  Espera que cierre el aeropuerto
                 while(true){
                     Thread.sleep(ManejadorTiempo.duracionHora() * 2);
                 }

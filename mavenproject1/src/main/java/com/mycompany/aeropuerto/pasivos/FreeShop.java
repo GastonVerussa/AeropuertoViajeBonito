@@ -1,12 +1,11 @@
 package com.mycompany.aeropuerto.pasivos;
 
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class FreeShop {
 
     private final int capacidadTotal;
-    private Semaphore capacidad;
+    private final Semaphore capacidad;
     private final Semaphore[] mutexCajas;
     private final Semaphore[] semaforosCajeros;
     private final Semaphore[] semaforosClientes;

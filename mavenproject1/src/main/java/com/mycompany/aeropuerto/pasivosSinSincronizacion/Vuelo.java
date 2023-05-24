@@ -1,5 +1,6 @@
-package com.mycompany.aeropuerto;
+package com.mycompany.aeropuerto.pasivosSinSincronizacion;
 
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.Horario;
 import com.mycompany.aeropuerto.pasivos.Terminal;
 
 public class Vuelo implements Comparable<Vuelo>{

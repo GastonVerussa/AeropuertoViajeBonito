@@ -1,8 +1,8 @@
-package com.mycompany.aeropuerto.pasivos;
+package com.mycompany.aeropuerto.pasivosSinSincronizacion;
 
-import com.mycompany.aeropuerto.Vuelo;
 import com.mycompany.aeropuerto.activos.Guardia;
 import com.mycompany.aeropuerto.activos.RecepcionistaAtencion;
+import com.mycompany.aeropuerto.pasivos.PuestoAtencion;
 import java.util.Collection;
 import java.util.TreeMap;
 
@@ -44,7 +44,7 @@ public class PuestoInformes {
     
     //  Metodos para los pasajeros
     
-    public synchronized PuestoAtencion recuperarPuesto(String nombreAerolinea){
+    public PuestoAtencion recuperarPuesto(String nombreAerolinea){
         return (PuestoAtencion) mapaPuestosAtencion.get(nombreAerolinea);
     }
 }

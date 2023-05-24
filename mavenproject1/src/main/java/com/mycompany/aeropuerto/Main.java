@@ -1,12 +1,13 @@
 package com.mycompany.aeropuerto;
 
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.GeneradorPasajes;
 import com.mycompany.aeropuerto.activos.ManejadorVuelos;
 import com.mycompany.aeropuerto.activos.GeneradorPasajeros;
 import com.mycompany.aeropuerto.activos.Maquinista;
 import com.mycompany.aeropuerto.activos.Pasajero;
 import com.mycompany.aeropuerto.activos.PorteroHorario;
 import com.mycompany.aeropuerto.pasivos.PuertasAeropuerto;
-import com.mycompany.aeropuerto.pasivos.PuestoInformes;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.PuestoInformes;
 import com.mycompany.aeropuerto.pasivos.Terminal;
 import com.mycompany.aeropuerto.pasivos.Tren;
 

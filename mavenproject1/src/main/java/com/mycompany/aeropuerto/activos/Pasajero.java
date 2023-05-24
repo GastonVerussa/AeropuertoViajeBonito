@@ -1,8 +1,9 @@
 package com.mycompany.aeropuerto.activos;
 
-import com.mycompany.aeropuerto.GeneradorPasajes;
-import com.mycompany.aeropuerto.ManejadorTiempo;
-import com.mycompany.aeropuerto.Pasaje;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.PuestoInformes;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.GeneradorPasajes;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.ManejadorTiempo;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.Pasaje;
 import com.mycompany.aeropuerto.pasivos.*;
 import java.util.Random;
 
@@ -54,7 +55,7 @@ public class Pasajero extends Thread{
                     //  Va al hall central a esperar
                     imprimir("La cola esta llena, a esperar al hall", 2);
                     HallCentral.esperarHall(puestoAtencion);
-                    imprimir("Oh gracias guardia, a ver si puedo entrar.", 2);
+                    imprimir("Oh bueno, a ver si puedo entrar.", 2);
                 }
                         //imprimir("Logre entrar a la cola, ahora a esperar mi turno.");
                 //  Realiza comunicacion con recepcionista
@@ -114,22 +115,23 @@ public class Pasajero extends Thread{
                     imprimir("No tengo mucho tiempo, no voy al free-shop esta vez", 4);
                 }
                 imprimir("Ahora a esperar el avion", 5);
-                do{
-                //  Espera que llegue su avion
-                terminal.esperarAvion(puertoEmbarque);
-                if(pasaje.getNumVuelo() == terminal.recuperarNumVueloPuerto(puertoEmbarque)){
-                    //  Si es su vuelo
-                    imprimir("Llegó mi avion, Adios!", 5);
-                    break;
-                } else {
+                boolean limiteEsperaSuperado = false;
+                while(pasaje.getNumVuelo() != terminal.recuperarNumVueloPuerto(puertoEmbarque) && !limiteEsperaSuperado){
                     if(ManejadorTiempo.milisRestantesParaHorario(pasaje.getHorario()) < ( - ManejadorTiempo.duracionHora())){
                         //  Si no es su vuelo y pasó más de 1 hora de su vuelo
-                        imprimir("Ya esperé mucho, pasó más de una hora de mi vuelo, me voy", 5);
-                        break;
+                        limiteEsperaSuperado = true;
+                    } else {
+                        //  Espera que llegue su avion
+                        terminal.esperarAvion(puertoEmbarque);
                     }
                 }
-                //  Si no era su vuelo, pero todavia no pasó el horario del suyo, sigue esperando
-                }while(true);
+                //  Revisa por que razon dejó de esperar
+                if(limiteEsperaSuperado){
+                    imprimir("Ya esperé mucho, pasó más de una hora de mi vuelo, me voy", 5);
+                } else {
+                    // Si limite de espera es falso, entonces salio del while porque llego su avion
+                    imprimir("Mi avión ya llegó, me retiro", 5);
+                }
             } catch (InterruptedException e){
                 imprimir("El aeropuerto esta cerrando, mejor me voy", 6);
             }

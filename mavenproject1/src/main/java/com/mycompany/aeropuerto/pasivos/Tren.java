@@ -1,6 +1,6 @@
 package com.mycompany.aeropuerto.pasivos;
 
-import com.mycompany.aeropuerto.ManejadorTiempo;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.ManejadorTiempo;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
@@ -99,7 +99,7 @@ public class Tren {
     
     //  Metodos para el Maquinista
     
-    public boolean esperarCapacidad() throws InterruptedException{
+    public synchronized boolean esperarCapacidad() throws InterruptedException{
         //  Espera que se vacie el contador (se llene el tren) o pase el tiempo designado (media hora)
         boolean trenLleno = contador.await(LIMITE_TIEMPO_ESPERA, TimeUnit.MILLISECONDS);
         //  Si no esta vacio, avisa que partio el tren

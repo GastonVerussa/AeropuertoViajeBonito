@@ -1,7 +1,7 @@
 package com.mycompany.aeropuerto.activos;
 
-import com.mycompany.aeropuerto.Horario;
-import com.mycompany.aeropuerto.ManejadorTiempo;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.Horario;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.ManejadorTiempo;
 import com.mycompany.aeropuerto.pasivos.HallCentral;
 import com.mycompany.aeropuerto.pasivos.PuertasAeropuerto;
 

@@ -1,7 +1,7 @@
 package com.mycompany.aeropuerto.pasivos;
 
-import com.mycompany.aeropuerto.ManejadorTiempo;
-import com.mycompany.aeropuerto.Vuelo;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.ManejadorTiempo;
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.Vuelo;
 import com.mycompany.aeropuerto.activos.Cajero;
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -13,7 +13,7 @@ public class Terminal {
         
         //  Guarda el vuelo que vaya a salir
         private Vuelo vueloActual;
-        private ArrayList<Vuelo> vuelosAsignados;
+        private final ArrayList<Vuelo> vuelosAsignados;
 
         public PuertoEmbarque(){
             vuelosAsignados = new ArrayList<>(2);
@@ -52,6 +52,41 @@ public class Terminal {
         }
     }
     
+    private class AvisoVuelo implements Runnable{
+        
+        private final Vuelo vuelo;
+
+        public AvisoVuelo(Vuelo vuelo) {
+            this.vuelo = vuelo;
+        }
+        
+        public void run(){
+            PuertoEmbarque puerto = puertosEmbarque[vuelo.getPuertoEmbarque() - numPuertoInicial];
+            synchronized (puerto) {
+                int identacion = 2;
+                String cadenaFinal = "";
+                for(int i = 1; i <= identacion; i++){
+                    cadenaFinal += "---";
+                }
+                cadenaFinal += "Listo el embarque para el vuelo " + vuelo.getNumVuelo() + 
+                        " con la aerolinea " + vuelo.getAerolinea() + " en el puerto " + vuelo.getPuertoEmbarque();
+                System.out.println(cadenaFinal);
+                puerto.setVuelo(vuelo);
+                puerto.notifyAll();
+                try{
+                    Thread.sleep(ManejadorTiempo.duracionHora());
+                } catch(InterruptedException e){
+                    System.out.println("------ Terminal " + nombre + ", puerto " 
+                            + this.vuelo.getPuertoEmbarque() + ". Error, aviso interrumpido.");
+                }
+                //  Si sigue estando su mismo vuelo, "se cansa de esperar y despega"
+                if(puerto.getVuelo() == vuelo){
+                    puerto.setVuelo(null);
+                }
+            }
+        }
+    }
+    
     private final String nombre;
     private final FreeShop freeShop;
     private final PuertoEmbarque[] puertosEmbarque;
@@ -83,7 +118,7 @@ public class Terminal {
     public void esperarAvion(int puertoEmbarque) throws InterruptedException{
         PuertoEmbarque puerto = puertosEmbarque[puertoEmbarque - numPuertoInicial];
         synchronized (puerto) {
-            puerto.wait(ManejadorTiempo.duracionHora());
+            puerto.wait(ManejadorTiempo.duracionHora() / 2);
         }
     }
     
@@ -137,30 +172,5 @@ public class Terminal {
         boolean exito = puerto.asignarVuelo(vuelo);
         if(exito) manejadorAvisos.schedule(new AvisoVuelo(vuelo), ManejadorTiempo.milisRestantesParaHorario(vuelo.getHorario()), TimeUnit.MILLISECONDS);
         return exito;
-    }
-
-    private class AvisoVuelo implements Runnable{
-        
-        private final Vuelo vuelo;
-
-        public AvisoVuelo(Vuelo vuelo) {
-            this.vuelo = vuelo;
-        }
-        
-        public void run(){
-            PuertoEmbarque puerto = puertosEmbarque[vuelo.getPuertoEmbarque() - numPuertoInicial];
-            synchronized (puerto) {
-                int identacion = 2;
-                String cadenaFinal = "";
-                for(int i = 1; i <= identacion; i++){
-                    cadenaFinal += "---";
-                }
-                cadenaFinal += "Listo el embarque para el vuelo " + vuelo.getNumVuelo() + 
-                        " con la aerolinea " + vuelo.getAerolinea() + " en el puerto " + vuelo.getPuertoEmbarque();
-                System.out.println(cadenaFinal);
-                puerto.setVuelo(vuelo);
-                puerto.notifyAll();
-            }
-        }
     }
 }

@@ -1,5 +1,6 @@
 package com.mycompany.aeropuerto.pasivos;
 
+import com.mycompany.aeropuerto.pasivosSinSincronizacion.ManejadorTiempo;
 import java.util.concurrent.Semaphore;
 
 public class FreeShop {
@@ -58,15 +59,20 @@ public class FreeShop {
     }
     
     //  Va a una de las cajas
-    public synchronized int irCaja() {
+    public synchronized int irCaja() throws InterruptedException{
         //  Espera que haya al menos una caja libre
         int cajaLibre = -1;
         while(cajaLibre == -1){
-            for(int i = 0; i <= mutexCajas.length; i++){
+            //  Revisa las cajas hasta revisar todas, o encontrar una libre
+            for(int i = 0; i < mutexCajas.length && cajaLibre == -1; i++){
                 if(mutexCajas[i].tryAcquire()){
                     cajaLibre = i;
-                    break;
                 }
+            }
+            //  Si todas las cajas estan ocupadas actualmente
+            if(cajaLibre == -1){
+                //  Espera 5 min antes de revisar de nuevo
+                Thread.sleep(ManejadorTiempo.duracionMinuto() * 5);
             }
         }
         semaforosCajeros[cajaLibre].release();
